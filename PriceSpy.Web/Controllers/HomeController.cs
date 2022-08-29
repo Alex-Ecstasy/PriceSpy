@@ -8,7 +8,7 @@ namespace PriceSpy.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly Random _random = new Random();
-
+        
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;

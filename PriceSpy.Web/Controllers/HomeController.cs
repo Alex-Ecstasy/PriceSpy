@@ -8,6 +8,9 @@ namespace PriceSpy.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly Random _random = new Random();
+        public SampleViewModel MySample = new SampleViewModel();
+        
+       
         
         public HomeController(ILogger<HomeController> logger)
         {
@@ -20,14 +23,16 @@ namespace PriceSpy.Web.Controllers
             {
                 return View();
             }
-            var tempView = new TemplateViewModel();
-            //tempView.NumberOfResults = _random.Next(1, 6);
-            tempView.NumberOfResults = 10;
+
+
             return View("Results");
         }
 
         public IActionResult Privacy()
         {
+            var randomNumber = new SampleViewModel();
+            randomNumber.NumberOfResults = _random.Next(1, 10);
+
             return View();
         }
 

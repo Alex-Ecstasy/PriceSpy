@@ -5,7 +5,7 @@ namespace PriceSpy.Web.Models
 {
     public static class CardHelper
     {
-        public static HtmlString CreateList(this IHtmlHelper html)
+        public static HtmlString CreateCard(this IHtmlHelper html)
         {
             string result = "<div class=\"card\" style=\"width: 280px;\">\r\n" +
                 "<img src=\"...\" class=\"rounded mx-auto d-block\" width=\"256\" height=\"200\">\r\n" +

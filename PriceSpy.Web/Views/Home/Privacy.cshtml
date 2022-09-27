@@ -1,15 +1,18 @@
-﻿@model TemplateViewModel
+﻿@model SampleViewModel
 
 @{
     ViewData["Title"] = "Страница for опытов";
+    var numberOfResult = Model.NumberOfResults; // не работает мой Random
+    ;
 }
 <h3>@ViewData["Title"]</h3>
 
 <div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 20px; padding-bottom: 10px">
     <div class="row" style="flex-wrap: nowrap">
-        @for (int i = 0; i < 4; i++)
+        @for (int i = 0; i < numberOfResult; i++)
         {
-        @CardHelper.CreateCard(Html);
-        };
+            CardHelper.CreateCard(Html);
+        }
+        ;
     </div>
 </div>

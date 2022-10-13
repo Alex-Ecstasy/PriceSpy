@@ -2,8 +2,7 @@
 {
     public class SampleViewModel
     {
-        public int NumberOfResults { get; set; }
-        //private readonly Random _random = new Random();
-        
+        public static int NumberOfResults { get; set; }
+
     }
 }

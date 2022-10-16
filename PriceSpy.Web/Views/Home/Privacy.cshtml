@@ -1,18 +1,11 @@
 ﻿@model SampleViewModel
-
 @{
-    ViewData["Title"] = "Страница for опытов";
-    var numberOfResult = SampleViewModel.NumberOfResults;
-    ;
+    ViewData["Title"] = "Страница для опытов";
 }
 <h3>@ViewData["Title"]</h3>
-
-<div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 20px; padding-bottom: 10px">
-    <div class="row" style="flex-wrap: nowrap">
-        @for (int i = 0; i < numberOfResult; i++)
-        {
-            CardHelper.CreateCard(Html);
-        }
-        ;
+@*<h5>Результатов поиска : @CardTemplate.Results </h5>*@
+@*<div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 20px; padding-bottom: 10px">
+    <div class="row" style="flex-wrap: nowrap">       
+        @Html.DisplayFor(x=>x.CardTemplates)
     </div>
-</div>
+</div>*@

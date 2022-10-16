@@ -3,56 +3,17 @@
 @{
     ViewData["Title"] = "Результаты поиска";
 }
-<h5>Результаты поискас сайта 1</h5>
 
-<div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 20px; padding-bottom: 10px">
-    <div class="row" style="flex-wrap: nowrap">
-        @for (int i = 0; i < 6; i++)
+@foreach (var site in @Model.Sites)
+{
+    <h5>Результатs поиска@ с сайта @site.Name: @site.ResultCount</h5>
+
+    <div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 20px; padding-bottom: 10px">
+        <div class="row" style="flex-wrap: nowrap">
+        @foreach (var card in @site.CardTemplates)
         {
-            <div class="card" style="width: 280px;">
-                <img src="..." class="rounded mx-auto d-block" width="256" height="200">
-                <div class="card-body">
-                    <h5 class="card-title">Описание товара</h5>
-                    <p class="card-text">Нужно ли доп информация?</p>
-                    <a href="#" class="btn btn-primary">Ссылка на товар?</a>
-                </div>
-            </div>
-        };
+            @await Html.PartialAsync("CardTemplate", card)
+        }
+        </div>
     </div>
-</div>
-
-<h5>Результаты поиска с сайта 2</h5>
-
-<div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 20px; padding-bottom: 10px">
-    <div class="row" style="flex-wrap: nowrap">
-        @for (int i = 0; i < 6; i++)
-        {
-            <div class="card" style="width: 280px;">
-                <img src="..." class="rounded mx-auto d-block" width="256" height="200">
-                <div class="card-body">
-                    <h5 class="card-title">Описание товара</h5>
-                    <p class="card-text">Нужно ли доп информация?</p>
-                    <a href="#" class="btn btn-primary">Ссылка на товар?</a>
-                </div>
-            </div>
-        };
-    </div>
-</div>
-
-<h5>Результаты поиска с сайта 3</h5>
-
-<div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 20px; padding-bottom: 10px">
-    <div class="row" style="flex-wrap: nowrap">
-        @for (int i = 0; i < 6; i++)
-        {
-            <div class="card" style="width: 280px;">
-                <img src="..." class="rounded mx-auto d-block" width="256" height="200">
-                <div class="card-body">
-                    <h5 class="card-title">Описание товара</h5>
-                    <p class="card-text">Нужно ли доп информация?</p>
-                    <a href="#" class="btn btn-primary">Ссылка на товар?</a>
-                </div>
-            </div>
-        };
-    </div>
-</div>
+}

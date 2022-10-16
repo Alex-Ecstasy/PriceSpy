@@ -7,34 +7,39 @@ namespace PriceSpy.Web.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly Random _random = new Random();
-        public SampleViewModel MySample = new SampleViewModel();
+        private readonly HtmlReader htmlReader;
+        
+        //public SampleViewModel MySample = new SampleViewModel();
         
 
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
+            htmlReader = new HtmlReader();
         }
 
-        public IActionResult Index(string searchQuery)
+        public async Task<IActionResult> Index(string searchQuery, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(searchQuery))
             {
                 return View();
             }
 
-            return View("Results");
+            var turbokResult = await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken);
+
+            SampleViewModel sampleViewModel = new SampleViewModel();
+
+            sampleViewModel.Sites.Add(turbokResult);
+
+            return View("Results", sampleViewModel);
         }
 
         public IActionResult Privacy()
         {
-            SampleViewModel.NumberOfResults = _random.Next(1, 10);
+            SampleViewModel sampleViewModel = new SampleViewModel();
 
-            return View();
-        }
-        public IActionResult HtmlReader()
-        {
-            return View();
+            //sampleViewModel.CardTemplates = Enumerable.Repeat(new CardTemplate(), CardTemplate.Results).ToArray();
+            return View(sampleViewModel);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -9,8 +9,6 @@ namespace PriceSpy.Web.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly HtmlReader htmlReader;
         
-        //public SampleViewModel MySample = new SampleViewModel();
-        
 
         public HomeController(ILogger<HomeController> logger)
         {

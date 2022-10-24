@@ -25,11 +25,13 @@ namespace PriceSpy.Web.Controllers
 
             var turbokResult = await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken);
             var magnitResult = await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken);
+            var akvilonResult = await htmlReader.GetAkvilonResultAsync(searchQuery, cancellationToken);
             SampleViewModel sampleViewModel = new SampleViewModel();
             SampleViewModel.Search = searchQuery;
 
             sampleViewModel.Sites.Add(turbokResult);
             sampleViewModel.Sites.Add(magnitResult);
+            sampleViewModel.Sites.Add(akvilonResult);
             return View("Results", sampleViewModel);
         }
 

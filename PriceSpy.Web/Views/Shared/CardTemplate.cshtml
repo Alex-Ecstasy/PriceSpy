@@ -3,15 +3,15 @@
 <div class="card" style="width: 280px;">
     <img src="@Model.Picture" class="rounded mx-auto d-block" width="256" height="200">
     <div class="card-body">
-        <h5 class="card-text">@Model.CatNumber</h5>
+        <h6 class="card-text">@Model.CatNumber</h6>
         @if (@Model.IsAvailable == true)
         {
-            <h5 class="card-text">@Model.Status</h5>
+            <h6 class="card-text">@Model.Status</h6>
             <a class="btn btn-primary" href="@(Model.UrlPrefix)@(Model.CardUrl)">@Model.Price</a>
         }
         else
         {
-            <h6 class="card-text">@Model.Status</h6>
+            <h7 class="card-text">@Model.Status</h7>
             <a class="btn btn-danger" style="padding: 0,375rem 4rem;" href="@(Model.UrlPrefix)@(Model.CardUrl)">@Model.Price</a>
         }
         <p class="card-title">@Model.Name</p>

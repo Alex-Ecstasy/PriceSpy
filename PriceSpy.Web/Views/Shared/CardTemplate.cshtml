@@ -1,18 +1,20 @@
 ﻿@model CardTemplate
 
 <div class="card" style="width: 280px;">
-    <img src="@Model.Picture" class="rounded mx-auto d-block" width="256" height="200">
+    <img src="@Model.Picture" class="rounded mx-auto d-block" width="256" height="200" >
     <div class="card-body">
         <h6 class="card-text">@Model.CatNumber</h6>
         @if (@Model.IsAvailable == true)
         {
-            <h6 class="card-text">@Model.Status</h6>
+            
             <a class="btn btn-primary" href="@(Model.UrlPrefix)@(Model.CardUrl)">@Model.Price</a>
+            <h6 class="card-text">@Model.Status</h6>
         }
         else
         {
+            
+            <a class="btn btn-danger" style="padding: 0,375rem 4rem; display:table;" href="@(Model.UrlPrefix)@(Model.CardUrl)">@Model.Price</a>
             <h7 class="card-text">@Model.Status</h7>
-            <a class="btn btn-danger" style="padding: 0,375rem 4rem;" href="@(Model.UrlPrefix)@(Model.CardUrl)">@Model.Price</a>
         }
         <p class="card-title">@Model.Name</p>
 

@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using System.Xml.Linq;
 
 namespace PriceSpy.Web.Models
 {
@@ -99,21 +100,49 @@ namespace PriceSpy.Web.Models
             {
                 foreach (var cardNode in nodes)
                 {
+                    string name = cardNode.SelectSingleNode("div/div[1]/div[2]/div[1]").InnerText.Trim() ?? string.Empty;
                     CardTemplate cardTemplate = new CardTemplate();
                     cardTemplate.UrlPrefix = "https://akvilonavto.by";
-                    cardTemplate.Name = cardNode.SelectSingleNode("div/div[1]/div[2]/div[1]").InnerText.Trim() ?? string.Empty;
+                    
                     cardTemplate.Price = cardNode.SelectSingleNode("div/div[1]/div[3]/div/span/span[2]").InnerText.Trim() ?? string.Empty;
                     cardTemplate.Picture = string.Concat(cardTemplate.UrlPrefix, cardNode.SelectSingleNode("div/div[1]/div[1]/div[1]/a/img")?.Attributes.FirstOrDefault(x => x.Name == "data-src")?.Value) ?? string.Empty;
-                    cardTemplate.CatNumber = cardNode.SelectSingleNode("div/div[2]/span/text()")?.InnerText.Trim() ?? string.Empty;
+                    cardTemplate.CatNumber = Splite(ref name) ?? string.Empty;
+                    cardTemplate.Name = name;
                     cardTemplate.Status = cardNode.SelectSingleNode("div/div[2]/div[1]/div[1]/div/div/span/span")?.InnerText.Trim() ?? string.Empty;
                     if (cardTemplate.Status != "Нет в наличии" )
                         cardTemplate.IsAvailable = true;
                     cardTemplate.CardUrl = cardNode.SelectSingleNode("div/div[1]/div[1]/div[1]/a").Attributes.FirstOrDefault(x => x.Name == "href")?.Value ?? string.Empty;
-
+                    //string s2 = "Сальник МАЗ балансира 2.2-145х175х14 РОСИЧЪ (537-3103037-01)";
+                    //string cardNumber = Splite(ref s2);
+                    //Console.WriteLine(s2);
+                    //Console.WriteLine(cardNumber);
                     siteModel.CardTemplates.Add(cardTemplate);
                 }
             }
             return siteModel;
+        }
+
+        private static string Splite(ref string cardName)
+        {
+            int charIndexForTrim = 0;
+            int numberOfParentheses = 0;
+            for (int i = cardName.Length - 1; i >= 0; i--)
+            {
+                if (cardName[i] == ')')
+                {
+                    numberOfParentheses++;
+                }
+                if (cardName[i] == '(')
+                    numberOfParentheses--;
+                if (numberOfParentheses == 0)
+                {
+                    charIndexForTrim = i;
+                    break;
+                }
+            }
+            var cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd();
+            cardName = cardName.Substring(0, charIndexForTrim).Trim();
+            return cardNumber;
         }
     }
 }

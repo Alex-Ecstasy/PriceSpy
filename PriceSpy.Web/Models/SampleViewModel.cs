@@ -33,5 +33,3 @@
         public static string? Search { get; set;}
     }
 }
-
-//https://learn.microsoft.com/ru-ru/aspnet/core/mvc/views/display-templates?view=aspnetcore-6.0

@@ -3,17 +3,24 @@
 @{
     ViewData["Title"] = "Результаты поиска";
 }
-<h5>Результаты по запросу:"@SampleViewModel.Search" </h5>
-@foreach (var site in @Model.Sites)
-{
-    <h4>@site.Name: @site.ResultCount</h4>
-
-    <div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 10px; padding-bottom: 10px">
-        <div class="row" style="flex-wrap: nowrap">
-        @foreach (var card in @site.CardTemplates)
+<h1> " "</h1>
+<ul class="list-group">
+    <li>
+        @foreach (var site in @Model.Sites)
         {
-            @await Html.PartialAsync("CardTemplate", card)
+            <h4>@site.Name: @site.ResultCount</h4>
+
+            <div class="container" style="overflow-x: scroll; max-width: 100%; padding-top: 10px; padding-bottom: 10px">
+                <div class="row" style="flex-wrap: nowrap">
+                    @foreach (var card in @site.CardTemplates)
+                    {
+                        @await Html.PartialAsync("CardTemplate", card)
+                    }
+                </div>
+            </div>
         }
-        </div>
-    </div>
-}
+    </li>
+
+</ul>
+
+

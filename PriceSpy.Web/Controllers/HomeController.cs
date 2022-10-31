@@ -38,8 +38,6 @@ namespace PriceSpy.Web.Controllers
         public IActionResult Privacy()
         {
             SampleViewModel sampleViewModel = new SampleViewModel();
-
-            //sampleViewModel.CardTemplates = Enumerable.Repeat(new CardTemplate(), CardTemplate.Results).ToArray();
             return View(sampleViewModel);
         }
 

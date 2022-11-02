@@ -8,6 +8,7 @@ namespace PriceSpy.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly HtmlReader htmlReader;
+        private readonly XmlHandler xmlHandler;
         
 
         public HomeController(ILogger<HomeController> logger)
@@ -32,13 +33,19 @@ namespace PriceSpy.Web.Controllers
             sampleViewModel.Sites.Add(turbokResult);
             sampleViewModel.Sites.Add(magnitResult);
             sampleViewModel.Sites.Add(akvilonResult);
+
+            //AllShippers allShippers = new AllShippers();
+            //XmlHandler.Read(allShippers);
+            //XmlHandler.Search(allShippers, searchQuery);
             return View("Results", sampleViewModel);
         }
 
-        public IActionResult Privacy()
+        public IActionResult Privacy(string searchQuery)
         {
-            SampleViewModel sampleViewModel = new SampleViewModel();
-            return View(sampleViewModel);
+            AllShippers allShippers = new AllShippers();
+            XmlHandler.Read(allShippers);
+            XmlHandler.Search(allShippers, searchQuery);
+            return View("Privacy", allShippers);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

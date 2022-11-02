@@ -4,6 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - PriceSpy.Web</title>
+    <Style>
+        .img {
+            object-fit: cover;
+            width: 100%;
+            height: 200px;
+        }
+        img:after{
+                content: url("SadClient.jpg");
+        }
+    </Style>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PriceSpy.Web.styles.css" asp-append-version="true" />

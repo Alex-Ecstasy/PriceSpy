@@ -34,15 +34,15 @@ namespace PriceSpy.Web.Models
 
         }
 
-        public static void Search(AllShippers allShippers)
+        public static void Search(AllShippers allShippers, string searchQuery)
         {
-            string? search = Console.ReadLine();
+            //string? search = Console.ReadLine();
             foreach (Shipper shipper in allShippers.shippers)
             {
                 Console.WriteLine("Выполняется поиск в " + shipper.Name);
 
                 var findElements = from item in shipper.Elements
-                                   where item.Name.Contains(search, StringComparison.OrdinalIgnoreCase) || item.CatNumber.Contains(search, StringComparison.OrdinalIgnoreCase)
+                                   where item.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) || item.CatNumber.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
                                    select item;
                 shipper.selectedElements = findElements;
             }

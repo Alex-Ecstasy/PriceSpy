@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System.Xml.Linq;
+using static System.Net.WebRequestMethods;
 
 namespace PriceSpy.Web.Models
 {
@@ -35,6 +36,7 @@ namespace PriceSpy.Web.Models
                     if (cardTemplate.Status == "В наличии") cardTemplate.IsAvailable = true;
                     cardTemplate.CardUrl = cardNode.SelectSingleNode("div[1]/a").Attributes.FirstOrDefault(x => x.Name == "href")?.Value ?? string.Empty;
                     siteModel.CardTemplates.Add(cardTemplate);
+                    if (cardTemplate.Picture == "https://turbok.by/img/no-photo--lg.png") cardTemplate.Picture = "SadClien.jpg";
                 }
                 siteModel.CardTemplates = siteModel.CardTemplates.OrderByDescending(x => x.IsAvailable).ToList();
             }
@@ -88,8 +90,10 @@ namespace PriceSpy.Web.Models
                     CardTemplate cardTemplate = new CardTemplate();
                     cardTemplate.UrlPrefix = "https://akvilonavto.by";
                     cardTemplate.Price = cardNode.SelectSingleNode("div/div[1]/div[3]/div/span/span[2]").InnerText.Trim() ?? string.Empty;
+                    if (cardTemplate.Price == "&nbsp;") cardTemplate.Price = "00.00 руб.";
                     cardTemplate.Picture = string.Concat(cardTemplate.UrlPrefix, cardNode.SelectSingleNode("div/div[1]/div[1]/div[1]/a/img")?.Attributes.FirstOrDefault(x => x.Name == "data-src")?.Value) ?? string.Empty;
                     cardTemplate.CatNumber = Splite(ref name) ?? string.Empty;
+                    if (String.IsNullOrEmpty(cardTemplate.CatNumber)) cardTemplate.CatNumber = "---";
                     cardTemplate.Name = name;
                     cardTemplate.Status = cardNode.SelectSingleNode("div/div[2]/div[1]/div[1]/div/div/span/span")?.InnerText.Trim() ?? string.Empty;
                     if (cardTemplate.Status != "Нет в наличии" ) cardTemplate.IsAvailable = true;
@@ -118,8 +122,8 @@ namespace PriceSpy.Web.Models
                     break;
                 }
             }
-            var cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd();
-            cardName = cardName.Substring(0, charIndexForTrim).Trim();
+            var cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd().Replace("&quot", "");
+            cardName = cardName.Substring(0, charIndexForTrim).Trim().Replace("&quot", "");
             return cardNumber;
         }
     }

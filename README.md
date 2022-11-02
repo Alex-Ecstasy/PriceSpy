@@ -13,7 +13,7 @@ Each card has a link to the seller's product page
 
 ![image](https://user-images.githubusercontent.com/103592628/199592823-ccf35f06-3514-4ed2-9dc0-bdf255ad00b3.png)
 
-### The web application uses the MVC pattern of the ASP.NET framework
+### The web application uses the MVC pattern of the ASP.NET
 What technologies did you use:
 - The application logic is written in C#
 - Razor Pages is used to render pages

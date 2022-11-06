@@ -33,16 +33,14 @@ namespace PriceSpy.Web.Controllers
             sampleViewModel.Sites.Add(turbokResult);
             sampleViewModel.Sites.Add(magnitResult);
             sampleViewModel.Sites.Add(akvilonResult);
-
-            AllShippers allShippers = new AllShippers();
-            XmlHandler.Read(allShippers);
-            XmlHandler.Search(allShippers, searchQuery);
+            XmlHandler.Read(sampleViewModel);
+            XmlHandler.Search(sampleViewModel, searchQuery);
             return View("Results", sampleViewModel);
         }
 
         public IActionResult Privacy(string searchQuery)
         {
-            AllShippers allShippers = new AllShippers();
+            SampleViewModel allShippers = new SampleViewModel();
             XmlHandler.Read(allShippers);
             XmlHandler.Search(allShippers, searchQuery);
             return View("Privacy", allShippers);

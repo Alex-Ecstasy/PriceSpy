@@ -47,17 +47,6 @@ namespace PriceSpy.Web.Models
                                    select item;
                 shipper.SelectedElements = findElements.ToList();
             }
-
-            //foreach (var selectedShippers in allShippers.shippers)
-            //{
-            //    Console.WriteLine("Результаты поиска " + selectedShippers.Name);
-            //    {
-            //        foreach (var item in selectedShippers.selectedElements)
-            //            Console.WriteLine("Название: {0} Номер: {1} Цена с НДС: {2}", item.Name, item.CatNumber, item.Price);
-            //    }
-            //    Console.WriteLine("******", 40);
-            //}
-            //Console.WriteLine("******000000********", 50);
         }
     }
 }

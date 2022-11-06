@@ -34,6 +34,7 @@ namespace PriceSpy.Web.Models
 
         }
 
+
         public static void Search(AllShippers allShippers, string searchQuery)
         {
             //string? search = Console.ReadLine();
@@ -54,7 +55,9 @@ namespace PriceSpy.Web.Models
                     foreach (var item in selectedShippers.selectedElements)
                         Console.WriteLine("Название: {0} Номер: {1} Цена с НДС: {2}", item.Name, item.CatNumber, item.Price);
                 }
+                Console.WriteLine("******", 40);
             }
+            Console.WriteLine("******000000********", 50);
         }
     }
 }

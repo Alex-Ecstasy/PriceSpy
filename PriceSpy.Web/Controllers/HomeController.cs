@@ -34,9 +34,9 @@ namespace PriceSpy.Web.Controllers
             sampleViewModel.Sites.Add(magnitResult);
             sampleViewModel.Sites.Add(akvilonResult);
 
-            //AllShippers allShippers = new AllShippers();
-            //XmlHandler.Read(allShippers);
-            //XmlHandler.Search(allShippers, searchQuery);
+            AllShippers allShippers = new AllShippers();
+            XmlHandler.Read(allShippers);
+            XmlHandler.Search(allShippers, searchQuery);
             return View("Results", sampleViewModel);
         }
 

@@ -22,8 +22,8 @@ namespace PriceSpy.Web.Models
                 foreach (var docelement in rowList)
                 {
                     Element element = new Element();
-                    element.CatNumber = (docelement as XmlElement).ChildNodes[0]?.InnerText.Trim();
-                    element.Name = (docelement as XmlElement).ChildNodes[1]?.InnerText.Trim();
+                    element.CatNumber = (docelement as XmlElement).ChildNodes[0]?.InnerText.Trim() ?? String.Empty;
+                    element.Name = (docelement as XmlElement).ChildNodes[1]?.InnerText.Trim() ?? String.Empty;
                     float price = 0;
                     float.TryParse((docelement as XmlElement).ChildNodes[2]?.InnerText.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out price);
                     element.Price = price;

@@ -2,8 +2,8 @@
 {
     public class Element
     {
-        public string? Name { get; set; }  = string.Empty;
-        public string? CatNumber { get; set; } = string.Empty;
+        public string? Name { get; set; }  = "Default";
+        public string? CatNumber { get; set; } = "Default";
         public float? Price { get; set; } = 0;
     }
     public class Shipper
@@ -20,10 +20,14 @@
             PriceFile = path;
             Name = name;
         }
-        public IEnumerable<Element> selectedElements { get; set; } = new List<Element>();
+        public ICollection<Element> SelectedElements { get; set; } = new List<Element>();
+        public int ResultCount
+        {
+            get { return SelectedElements.Count; }
+        }
     }
     public class AllShippers
     {
-        public ICollection<Shipper> shippers { get; set; } = new List<Shipper>();
+        //public ICollection<Shipper> shippers { get; set; } = new List<Shipper>();
     }
 }

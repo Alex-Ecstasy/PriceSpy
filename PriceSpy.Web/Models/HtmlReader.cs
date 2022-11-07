@@ -36,7 +36,7 @@ namespace PriceSpy.Web.Models
                     if (cardTemplate.Status == "В наличии") cardTemplate.IsAvailable = true;
                     cardTemplate.CardUrl = cardNode.SelectSingleNode("div[1]/a").Attributes.FirstOrDefault(x => x.Name == "href")?.Value ?? string.Empty;
                     siteModel.CardTemplates.Add(cardTemplate);
-                    if (cardTemplate.Picture == "https://turbok.by/img/no-photo--lg.png") cardTemplate.Picture = "SadClien.jpg";
+                    if (cardTemplate.Picture == "https://turbok.by/img/no-photo--lg.png") cardTemplate.Picture = "SadClient.jpg";
                 }
                 siteModel.CardTemplates = siteModel.CardTemplates.OrderByDescending(x => x.IsAvailable).ToList();
             }

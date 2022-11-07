@@ -31,5 +31,6 @@
     {
         public ICollection<SiteModel> Sites { get; set; } = new List<SiteModel>();
         public static string? Search { get; set;}
+        public ICollection<Shipper> shippers { get; set; } = new List<Shipper>();
     }
 }

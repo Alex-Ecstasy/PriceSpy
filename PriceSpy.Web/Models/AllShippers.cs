@@ -5,6 +5,7 @@
         public string? Name { get; set; }  = "Default";
         public string? CatNumber { get; set; } = "Default";
         public float? Price { get; set; } = 0;
+        
     }
     public class Shipper : Seller
     {

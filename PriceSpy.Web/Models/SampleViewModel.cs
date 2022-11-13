@@ -1,6 +1,6 @@
 ﻿namespace PriceSpy.Web.Models
 {
-    public class CardTemplate
+    public class Card
     {
         public string? Name { get; set; }
         public float? Price { get; set; } = 0;
@@ -16,13 +16,13 @@
     {
         public string? Name { get; set; }
        
-        public ICollection<CardTemplate> CardTemplates { get; set; } = new List<CardTemplate>();
+        public ICollection<Card> CardList { get; set; } = new List<Card>();
 
         public int ResultCount
         {
             get
             {
-                return CardTemplates.Count;
+                return CardList.Count;
             }
         }
     }

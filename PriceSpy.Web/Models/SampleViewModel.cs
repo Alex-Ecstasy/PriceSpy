@@ -3,7 +3,7 @@
     public class CardTemplate
     {
         public string? Name { get; set; }
-        public string? Price { get; set; } = "0";
+        public float? Price { get; set; } = 0;
         public string? Picture { get; set; }
         public string? CatNumber { get; set; }
         public string? Status { get; set; }
@@ -12,7 +12,7 @@
         public string? UrlPrefix { get; set; }
     }
 
-    public class SiteModel
+    public class Seller
     {
         public string? Name { get; set; }
        
@@ -29,7 +29,7 @@
 
     public class SampleViewModel
     {
-        public ICollection<SiteModel> Sites { get; set; } = new List<SiteModel>();
+        public ICollection<Seller> Sites { get; set; } = new List<Seller>();
         public static string? Search { get; set;}
         public ICollection<Shipper> shippers { get; set; } = new List<Shipper>();
     }

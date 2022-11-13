@@ -33,7 +33,6 @@ Sometimes the product card did not have an image. Solved it with the default ima
 When parsing, various kinds of artifacts often appear in the lines, they also had to be calculated separately (maybe something was left)
 
 ## What will be changed:
-- Improve code readability by adding a single parsing method for all sites
 - Combine classes of site product cards and product cards from price lists
 - Add sorting of results in ascending order of prices
 - Change the layout of the cards so that more information fits on one page without scrolling
@@ -42,3 +41,4 @@ When parsing, various kinds of artifacts often appear in the lines, they also ha
 
 ### What has already been done
 - Add search by supplier prices (local only)
+- Improve code readability by adding a single parsing method for all sites

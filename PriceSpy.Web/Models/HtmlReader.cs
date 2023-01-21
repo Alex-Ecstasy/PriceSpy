@@ -89,14 +89,48 @@ namespace PriceSpy.Web.Models
                 {
                     Card card = new Card();
                     string name = GetName("div/div[1]/div[2]/div[1]", cardNode);
+                    string pictureAttribute = "data-src";
                     card.UrlPrefix = "https://akvilonavto.by";
                     card.Price = GetPrice("div/div[1]/div[3]/div/span/span[2]", cardNode);
-                    card.Picture = GetAkvilonPicture("div/div[1]/div[1]/div[1]/a/img", card.UrlPrefix, cardNode);
+                    card.Picture = GetPictureFromAttribute("div/div[1]/div[1]/div[1]/a/img", card.UrlPrefix, cardNode, pictureAttribute);
                     card.CatNumber = Splite(ref name);
                     card.Name = name;
                     card.Status = GetStatus("div/div[2]/div[1]/div[1]/div/div/span/span", cardNode);
                     if (card.Status != "Нет в наличии" || card.Status != "Неизвестный статус") card.IsAvailable = true;
                     card.CardUrl = GetCardUrl("div/div[1]/div[1]/div[1]/a", cardNode);
+                    siteModel.CardList.Add(card);
+                }
+                siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+            }
+            return siteModel;
+        }
+        public async Task<Seller> GetBelagroResult(string search, CancellationToken cancellationToken)
+        {
+
+            var httpResult = await httpClient.GetAsync($"https://1belagro.by/search/?q={search}", cancellationToken);
+            if (!httpResult.IsSuccessStatusCode)
+                throw new Exception("Belagro wrong");
+            var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+            var siteModel = new Seller { Name = "Belagro" };
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(htmlResult);
+            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"search_catalog\"]/table/tbody/tr");
+            if (nodes != null)
+            {
+                foreach (var cardNode in nodes)
+                {
+                    Card card = new Card();
+                    string name = GetName("td/a", cardNode);
+                    string pictureAttribute = "href";
+                    card.UrlPrefix = "https://1belagro.by";
+                    card.Price = GetPrice("td[2]/div[2]", cardNode);
+                    card.Picture = GetPictureFromAttribute("td[1]/div/a", card.UrlPrefix, cardNode, pictureAttribute);
+                    card.CatNumber = SpliteBelagro(ref name);
+                    card.Name = name;
+                    card.Status = GetBelagroStatus("td[1]/div/div/span", cardNode);
+                    card.IsAvailable = card.Status == "В наличии" ? true : false;
+                    //if (card.Status == "В наличии") card.IsAvailable = true;
+                    card.CardUrl = GetCardUrl("td[1]/a", cardNode);
                     siteModel.CardList.Add(card);
                 }
                 siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
@@ -112,7 +146,7 @@ namespace PriceSpy.Web.Models
         private static float GetPrice(string priceNode, HtmlNode cardNode) /// if Price 10,3 => 10,30 
         {
             float cardPrice = 0;
-            var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim().Replace("&nbsp;", "").Replace("руб.", "").Replace("/комплект", "").Replace(".", ",");
+            var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim().Replace("&nbsp;", "").Replace("р.", "").Replace("руб.", "").Replace("/комплект", "").Replace(".", ",");
             bool isRightPrice = float.TryParse(priceText, NumberStyles.Any, CultureInfo.CurrentCulture, out float price);
             if (isRightPrice) cardPrice = price;
             return cardPrice;
@@ -125,9 +159,9 @@ namespace PriceSpy.Web.Models
             if (cardPicture == "https://turbok.by/img/no-photo--lg.png") cardPicture = "SadClient.jpg";
             return cardPicture;
         }
-        private static string GetAkvilonPicture(string pictureNode, string prefixNode, HtmlNode cardNode)
+        private static string GetPictureFromAttribute(string pictureNode, string prefixNode, HtmlNode cardNode, string pictureAttribute)
         {
-            string? cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == "data-src")?.Value;
+            string? cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == pictureAttribute)?.Value;
             if (!String.IsNullOrEmpty(cardPicture))
             {
                 cardPicture = string.Concat(prefixNode, cardPicture);
@@ -147,6 +181,14 @@ namespace PriceSpy.Web.Models
         private static string GetStatus(string statusNode, HtmlNode cardNode)
         {
             string? cardStatus = cardNode.SelectSingleNode(statusNode)?.InnerText.Trim();
+            if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
+            return cardStatus;
+        }
+        private static string GetBelagroStatus(string statusNode, HtmlNode cardNode)
+        {
+            string? cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();
+            if (cardStatus == "city store-none") cardStatus = "Нет в наличии";
+            if (cardStatus == "city") cardStatus = "В наличии";
             if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
             return cardStatus;
         }
@@ -176,6 +218,32 @@ namespace PriceSpy.Web.Models
             var cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd().Replace("&quot", "");
             if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
             cardName = cardName.Substring(0, charIndexForTrim).Trim().Replace("&quot", "");
+            return cardNumber;
+        }
+        private static string SpliteBelagro(ref string cardName)
+        {
+
+            int charIndexForTrim = cardName.IndexOf(' ');
+            //int numberOfParentheses = 0;
+            //for (int i = cardName.Length - 1; i >= 0; i--)
+            //{
+            //    if (cardName[i] == ')')
+            //    {
+            //        numberOfParentheses++;
+            //    }
+            //    if (cardName[i] == '(')
+            //        numberOfParentheses--;
+            //    if (numberOfParentheses == 0)
+            //    {
+            //        charIndexForTrim = i;
+            //        break;
+            //    }
+            //}
+            //var cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd().Replace("&quot", "");
+            var cardNumber = cardName.Substring(0, charIndexForTrim).Trim();
+            //if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
+            cardName = cardName.Substring(charIndexForTrim).Trim();
+
             return cardNumber;
         }
     }

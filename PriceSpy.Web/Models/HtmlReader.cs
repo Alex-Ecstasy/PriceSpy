@@ -67,6 +67,7 @@ namespace PriceSpy.Web.Models
                     card.Status = GetStatus("div/div[2]/div[3]/span[1]", cardNode);
                     if (card.Status == "В наличии") card.IsAvailable = true;
                     card.CardUrl = GetCardUrl("div/div[2]/div[1]/a", cardNode);
+                    card.Name = card.Name.Replace(card.CatNumber, "");
                     siteModel.CardList.Add(card);
                 }
                 siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
@@ -224,24 +225,8 @@ namespace PriceSpy.Web.Models
         {
 
             int charIndexForTrim = cardName.IndexOf(' ');
-            //int numberOfParentheses = 0;
-            //for (int i = cardName.Length - 1; i >= 0; i--)
-            //{
-            //    if (cardName[i] == ')')
-            //    {
-            //        numberOfParentheses++;
-            //    }
-            //    if (cardName[i] == '(')
-            //        numberOfParentheses--;
-            //    if (numberOfParentheses == 0)
-            //    {
-            //        charIndexForTrim = i;
-            //        break;
-            //    }
-            //}
-            //var cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd().Replace("&quot", "");
             var cardNumber = cardName.Substring(0, charIndexForTrim).Trim();
-            //if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
+            if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
             cardName = cardName.Substring(charIndexForTrim).Trim();
 
             return cardNumber;

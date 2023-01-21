@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using static System.Net.WebRequestMethods;
 
@@ -138,6 +139,43 @@ namespace PriceSpy.Web.Models
             }
             return siteModel;
         }
+        //public async Task<Seller> GetMazrezervResult(string search, CancellationToken cancellationToken)
+        //{
+        //    httpClient.DefaultRequestHeaders.Clear();
+        //    var httpResult = await httpClient.GetAsync($"https://www.mazrezerv.ru/price/?caption={search}&search=full", cancellationToken);
+        //    if (!httpResult.IsSuccessStatusCode)
+        //        throw new Exception("Mazrezerv wrong");
+
+        //    //var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+        //    string htmlResult = null;
+        //    using (var sr = new StreamReader(await httpResult.Content.ReadAsStreamAsync(), Encoding.GetEncoding("iso-8859-1")))
+        //    {
+        //        htmlResult = sr.ReadToEnd();
+        //    }
+        //    var siteModel = new Seller { Name = "Mazrezerv" };
+
+        //    HtmlDocument doc = new HtmlDocument();
+        //    doc.LoadHtml(htmlResult);
+        //    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"items_list\"]");
+        //    if (nodes != null)
+        //    {
+        //        foreach (var cardNode in nodes)
+        //        {
+        //            Card card = new Card();
+        //            card.UrlPrefix = "https://www.mazrezerv.ru";
+        //            card.Name = GetName("div[2]/div[1]/div[1]", cardNode);
+        //            card.Price = GetPrice("div[2]/div[2]/div", cardNode);
+        //            card.Picture = GetPicture("div[1]/a/div/img", cardNode);
+        //            card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
+        //            card.Status = GetStatus("div[2]/div[1]/p", cardNode);
+        //            if (card.Status == "В наличии") card.IsAvailable = true;
+        //            card.CardUrl = GetCardUrl("div[1]/a", cardNode);
+        //            siteModel.CardList.Add(card);
+        //        }
+        //        siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+        //    }
+        //    return siteModel;
+        //}
         private static string GetName(string nameNode, HtmlNode cardNode)
         {
             string? cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim().Replace("&#34;", "") ?? string.Empty;

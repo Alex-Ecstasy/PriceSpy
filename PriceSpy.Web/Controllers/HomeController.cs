@@ -28,12 +28,15 @@ namespace PriceSpy.Web.Controllers
             var turbokResult = await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken);
             var magnitResult = await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken);
             var akvilonResult = await htmlReader.GetAkvilonResultAsync(searchQuery, cancellationToken);
+            var belagroResult = await htmlReader.GetBelagroResult(searchQuery, cancellationToken);
+
             
             SampleViewModel.Search = searchQuery;
 
             sampleViewModel.Sites.Add(turbokResult);
             sampleViewModel.Sites.Add(magnitResult);
             sampleViewModel.Sites.Add(akvilonResult);
+            sampleViewModel.Sites.Add(belagroResult);
             
             XmlHandler.Search(sampleViewModel, searchQuery);
             return View("Results", sampleViewModel);

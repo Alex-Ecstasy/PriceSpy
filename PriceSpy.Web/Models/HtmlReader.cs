@@ -18,7 +18,8 @@ namespace PriceSpy.Web.Models
         {
             var httpResult = await httpClient.GetAsync($"https://turbok.by/search?gender=&gender=&catlist=0&searchText={search}", cancellationToken);
             if (!httpResult.IsSuccessStatusCode)
-                throw new Exception("Turbok wrong");
+                //throw new Exception("Turbok wrong");
+                return null;
             var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
             var siteModel = new Seller { Name = "Turbok" };
 
@@ -48,7 +49,8 @@ namespace PriceSpy.Web.Models
         {
             var httpResult = await httpClient.GetAsync($"https://minskmagnit.by/site_search?search_term={search}", cancellationToken);
             if (!httpResult.IsSuccessStatusCode)
-                throw new Exception("Magnit wrong");
+                //throw new Exception("Magnit wrong");
+                return null;
             var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
             var siteModel = new Seller { Name = "Minskmagnit" };
 
@@ -79,7 +81,8 @@ namespace PriceSpy.Web.Models
         {
             var httpResult = await httpClient.GetAsync($"https://akvilonavto.by/catalog/?q={search}", cancellationToken);
             if (!httpResult.IsSuccessStatusCode)
-                throw new Exception("Akvilon wrong");
+                //throw new Exception("Akvilon wrong");
+                return null;
             var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
             var siteModel = new Seller { Name = "Akvilon" };
             HtmlDocument doc = new HtmlDocument();
@@ -111,7 +114,8 @@ namespace PriceSpy.Web.Models
 
             var httpResult = await httpClient.GetAsync($"https://1belagro.by/search/?q={search}", cancellationToken);
             if (!httpResult.IsSuccessStatusCode)
-                throw new Exception("Belagro wrong");
+                //throw new Exception("Belagro wrong");
+                return null;
             var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
             var siteModel = new Seller { Name = "Belagro" };
             HtmlDocument doc = new HtmlDocument();
@@ -139,43 +143,48 @@ namespace PriceSpy.Web.Models
             }
             return siteModel;
         }
-        //public async Task<Seller> GetMazrezervResult(string search, CancellationToken cancellationToken)
-        //{
-        //    httpClient.DefaultRequestHeaders.Clear();
-        //    var httpResult = await httpClient.GetAsync($"https://www.mazrezerv.ru/price/?caption={search}&search=full", cancellationToken);
-        //    if (!httpResult.IsSuccessStatusCode)
-        //        throw new Exception("Mazrezerv wrong");
+        public async Task<Seller> GetMazrezervResult(string search, CancellationToken cancellationToken)
+        {
+            httpClient.DefaultRequestHeaders.Clear();
+            var httpResult = await httpClient.GetAsync($"https://www.mazrezerv.ru/price/?caption={search}&search=full", cancellationToken);
+            if (!httpResult.IsSuccessStatusCode)
+                //throw new Exception("Mazrezerv wrong");
+                return null;
+            //var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+            //var res = await httpResult.Content();
+            string htmlResult = null;
 
-        //    //var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
-        //    string htmlResult = null;
-        //    using (var sr = new StreamReader(await httpResult.Content.ReadAsStreamAsync(), Encoding.GetEncoding("iso-8859-1")))
-        //    {
-        //        htmlResult = sr.ReadToEnd();
-        //    }
-        //    var siteModel = new Seller { Name = "Mazrezerv" };
+            //Encoding encoding = Encoding.GetEncoding("windows-1251");
+            //EncodingProvider encodingProvider = new EncodingProvider("windows-1251");
+            //Encoding.RegisterProvider(encodingProvider);
+            using (var sr = new StreamReader(await httpResult.Content.ReadAsStreamAsync(), Encoding.UTF8))
+            {
+                htmlResult = sr.ReadToEnd();
+            }
+            var siteModel = new Seller { Name = "Mazrezerv" };
 
-        //    HtmlDocument doc = new HtmlDocument();
-        //    doc.LoadHtml(htmlResult);
-        //    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"items_list\"]");
-        //    if (nodes != null)
-        //    {
-        //        foreach (var cardNode in nodes)
-        //        {
-        //            Card card = new Card();
-        //            card.UrlPrefix = "https://www.mazrezerv.ru";
-        //            card.Name = GetName("div[2]/div[1]/div[1]", cardNode);
-        //            card.Price = GetPrice("div[2]/div[2]/div", cardNode);
-        //            card.Picture = GetPicture("div[1]/a/div/img", cardNode);
-        //            card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
-        //            card.Status = GetStatus("div[2]/div[1]/p", cardNode);
-        //            if (card.Status == "В наличии") card.IsAvailable = true;
-        //            card.CardUrl = GetCardUrl("div[1]/a", cardNode);
-        //            siteModel.CardList.Add(card);
-        //        }
-        //        siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
-        //    }
-        //    return siteModel;
-        //}
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(htmlResult);
+            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"print\"]/table/tr");
+            if (nodes != null)
+            {
+                foreach (var cardNode in nodes)
+                {
+                    //Card card = new Card();
+                    //card.UrlPrefix = "https://www.mazrezerv.ru";
+                    //card.Name = GetName("div[2]/div[1]/div[1]", cardNode);
+                    //card.Price = GetPrice("div[2]/div[2]/div", cardNode);
+                    //card.Picture = GetPicture("div[1]/a/div/img", cardNode);
+                    //card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
+                    //card.Status = GetStatus("div[2]/div[1]/p", cardNode);
+                    //if (card.Status == "В наличии") card.IsAvailable = true;
+                    //card.CardUrl = GetCardUrl("div[1]/a", cardNode);
+                    //siteModel.CardList.Add(card);
+                }
+                siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+            }
+            return siteModel;
+        }
         private static string GetName(string nameNode, HtmlNode cardNode)
         {
             string? cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim().Replace("&#34;", "") ?? string.Empty;
@@ -263,6 +272,7 @@ namespace PriceSpy.Web.Models
         {
 
             int charIndexForTrim = cardName.IndexOf(' ');
+            if (charIndexForTrim <= 0) charIndexForTrim = 0;
             var cardNumber = cardName.Substring(0, charIndexForTrim).Trim();
             if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
             cardName = cardName.Substring(charIndexForTrim).Trim();

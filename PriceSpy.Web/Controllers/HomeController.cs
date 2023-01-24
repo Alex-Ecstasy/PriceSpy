@@ -29,7 +29,7 @@ namespace PriceSpy.Web.Controllers
             var magnitResult = await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken);
             var akvilonResult = await htmlReader.GetAkvilonResultAsync(searchQuery, cancellationToken);
             var belagroResult = await htmlReader.GetBelagroResult(searchQuery, cancellationToken);
-            //var mazrezervResult = await htmlReader.GetMazrezervResult(searchQuery, cancellationToken);
+            var mazrezervResult = await htmlReader.GetMazrezervResult(searchQuery, cancellationToken);
 
             SampleViewModel.Search = searchQuery;
 
@@ -37,7 +37,7 @@ namespace PriceSpy.Web.Controllers
             sampleViewModel.Sites.Add(magnitResult);
             sampleViewModel.Sites.Add(akvilonResult);
             sampleViewModel.Sites.Add(belagroResult);
-            //sampleViewModel.Sites.Add(mazrezervResult);
+            sampleViewModel.Sites.Add(mazrezervResult);
 
             XmlHandler.Search(sampleViewModel, searchQuery);
             return View("Results", sampleViewModel);

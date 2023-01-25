@@ -194,6 +194,7 @@ namespace PriceSpy.Web.Models
         private static float GetPrice(string priceNode, HtmlNode cardNode) /// if Price 10,3 => 10,30 
         {
             float cardPrice = 0;
+            if (cardNode.SelectSingleNode(priceNode) == null) return cardPrice = 0;
             var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim().Replace("&nbsp;", "").Replace("р.", "").Replace("руб.", "").Replace("/комплект", "").Replace(".", ",");
             bool isRightPrice = float.TryParse(priceText, NumberStyles.Any, CultureInfo.CurrentCulture, out float price);
             if (isRightPrice) cardPrice = price;
@@ -244,7 +245,7 @@ namespace PriceSpy.Web.Models
         private static string GetBelagroStatus(string statusNode, HtmlNode cardNode)
         {
             string? cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();
-            if (cardStatus == "city store-none") cardStatus = "Нет в наличии";
+            if (cardStatus == "city store-none") cardStatus = "Под заказ";
             if (cardStatus == "city") cardStatus = "В наличии";
             if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
             return cardStatus;

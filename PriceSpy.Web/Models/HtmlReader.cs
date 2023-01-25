@@ -39,7 +39,7 @@ namespace PriceSpy.Web.Models
                     card.Picture = GetPicture("div[1]/a/div/img", cardNode);
                     card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
                     card.Status = GetStatus("div[2]/div[1]/p", cardNode);
-                    if (card.Status == "В наличии") card.IsAvailable = true;
+                    card.IsAvailable = GetAvailable(card.Status);
                     card.CardUrl = GetCardUrl("div[1]/a", cardNode);
                     siteModel.CardList.Add(card);
                 }
@@ -70,7 +70,7 @@ namespace PriceSpy.Web.Models
                     card.Picture = GetPicture("div/div[1]/a/img", cardNode);
                     card.CatNumber = GetCatNumber("div/div[2]/span/text()", cardNode);
                     card.Status = GetStatus("div/div[2]/div[3]/span[1]", cardNode);
-                    if (card.Status == "В наличии") card.IsAvailable = true;
+                    card.IsAvailable = GetAvailable(card.Status);
                     card.CardUrl = GetCardUrl("div/div[2]/div[1]/a", cardNode);
                     card.Name = card.Name.Replace(card.CatNumber, "");
                     siteModel.CardList.Add(card);
@@ -103,7 +103,7 @@ namespace PriceSpy.Web.Models
                     card.CatNumber = Splite(ref name);
                     card.Name = name;
                     card.Status = GetStatus("div/div[2]/div[1]/div[1]/div/div/span/span", cardNode);
-                    if (card.Status != "Нет в наличии" || card.Status != "Неизвестный статус") card.IsAvailable = false;
+                    card.IsAvailable = GetAvailable(card.Status);
                     card.CardUrl = GetCardUrl("div/div[1]/div[1]/div[1]/a", cardNode);
                     siteModel.CardList.Add(card);
                 }
@@ -136,8 +136,7 @@ namespace PriceSpy.Web.Models
                     card.CatNumber = SpliteBelagro(ref name);
                     card.Name = name;
                     card.Status = GetBelagroStatus("td[1]/div/div/span", cardNode);
-                    card.IsAvailable = card.Status == "В наличии" ? true : false;
-                    //if (card.Status == "В наличии") card.IsAvailable = true;
+                    card.IsAvailable = GetAvailable(card.Status);
                     card.CardUrl = GetCardUrl("td[1]/a", cardNode);
                     siteModel.CardList.Add(card);
                 }
@@ -233,6 +232,15 @@ namespace PriceSpy.Web.Models
             if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
             return cardStatus;
         }
+        private static bool GetAvailable(string statusNode) => statusNode switch
+        {
+            "Нет в наличии" => false,
+            "Неизвестный статус" => false,
+            "Под заказ" => false,
+            "В наличии" => true,
+            "Менее 10 шт" => true,
+            _ => false
+        };
         private static string GetBelagroStatus(string statusNode, HtmlNode cardNode)
         {
             string? cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();

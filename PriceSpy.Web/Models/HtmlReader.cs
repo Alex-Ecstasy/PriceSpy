@@ -1,8 +1,10 @@
 ﻿using HtmlAgilityPack;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using static System.Text.Encoding;
 using static System.Net.WebRequestMethods;
 
 namespace PriceSpy.Web.Models
@@ -101,7 +103,7 @@ namespace PriceSpy.Web.Models
                     card.CatNumber = Splite(ref name);
                     card.Name = name;
                     card.Status = GetStatus("div/div[2]/div[1]/div[1]/div/div/span/span", cardNode);
-                    if (card.Status != "Нет в наличии" || card.Status != "Неизвестный статус") card.IsAvailable = true;
+                    if (card.Status != "Нет в наличии" || card.Status != "Неизвестный статус") card.IsAvailable = false;
                     card.CardUrl = GetCardUrl("div/div[1]/div[1]/div[1]/a", cardNode);
                     siteModel.CardList.Add(card);
                 }
@@ -150,17 +152,16 @@ namespace PriceSpy.Web.Models
             if (!httpResult.IsSuccessStatusCode)
                 //throw new Exception("Mazrezerv wrong");
                 return null;
-            //var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+            var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
             //var res = await httpResult.Content();
-            string htmlResult = null;
-
-            //Encoding encoding = Encoding.GetEncoding("windows-1251");
-            //EncodingProvider encodingProvider = new EncodingProvider("windows-1251");
-            //Encoding.RegisterProvider(encodingProvider);
-            using (var sr = new StreamReader(await httpResult.Content.ReadAsStreamAsync(), Encoding.UTF8))
-            {
-                htmlResult = sr.ReadToEnd();
-            }
+            //string htmlResult = null;
+            //var buffer = await httpResult.Content.ReadAsByteArrayAsync();
+            //byte[] bytes = buffer.ToArray();
+            //string htmlResult = encoding.GetString(bytes, 0, bytes.Length);
+            //using (var sr = new StreamReader(await httpResult.Content.ReadAsStreamAsync(), Encoding.UTF8))
+            //{
+            //    htmlResult = sr.ReadToEnd();
+            //}
             var siteModel = new Seller { Name = "Mazrezerv" };
 
             HtmlDocument doc = new HtmlDocument();

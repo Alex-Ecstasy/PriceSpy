@@ -65,13 +65,13 @@ namespace PriceSpy.Web.Models
                 {
                     Card card = new Card();
                     card.UrlPrefix = "https://minskmagnit.by";
-                    card.Name = GetName("div[1]/div[2]/div[1]/a", cardNode);
-                    card.Price = GetPrice("div/div[2]/div[2]/span", cardNode);
+                    card.Name = GetName("div/div[2]/div[1]/div", cardNode);
+                    card.Price = GetPrice("div/div[2]/div[2]/div", cardNode);
                     card.Picture = GetPicture("div/div[1]/a/img", cardNode);
-                    card.CatNumber = GetCatNumber("div/div[2]/span/text()", cardNode);
-                    card.Status = GetStatus("div/div[2]/div[3]/span[1]", cardNode);
+                    card.CatNumber = GetCatNumber("div/div[2]/div[1]/span", cardNode);
+                    card.Status = GetStatus("div/div[2]/div[2]/div[2]/span[1]", cardNode);
                     card.IsAvailable = GetAvailable(card.Status);
-                    card.CardUrl = GetCardUrl("div/div[2]/div[1]/a", cardNode);
+                    card.CardUrl = GetCardUrl("div/div[2]/div[1]", cardNode);
                     card.Name = card.Name.Replace(card.CatNumber, "");
                     siteModel.CardList.Add(card);
                 }
@@ -187,7 +187,9 @@ namespace PriceSpy.Web.Models
         }
         private static string GetName(string nameNode, HtmlNode cardNode)
         {
-            string? cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim().Replace("&#34;", "") ?? string.Empty;
+            string? cardName = String.Empty;
+            if (cardNode.SelectSingleNode(nameNode) == null) return cardName = "-----";
+            cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim().Replace("&#34;", "") ?? string.Empty;
             if (cardName == string.Empty) cardName = "-----";
             return cardName;
         }
@@ -202,7 +204,9 @@ namespace PriceSpy.Web.Models
         }
         private static string GetPicture(string pictureNode, HtmlNode cardNode)
         {
-            string? cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == "src")?.Value ?? string.Empty;
+            string? cardPicture = "SadClient.jpg";
+            if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "SadClient.jpg";
+            cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == "src")?.Value ?? string.Empty;
             if (string.IsNullOrEmpty(cardPicture)) cardPicture = cardNode.SelectSingleNode("div/div[1]/div[1]/div[1]/a/img")?.Attributes.FirstOrDefault(x => x.Name == "data-src")?.Value;
             if (String.IsNullOrEmpty(cardPicture)) cardPicture = "SadClient.jpg";
             if (cardPicture == "https://turbok.by/img/no-photo--lg.png") cardPicture = "SadClient.jpg";
@@ -210,7 +214,9 @@ namespace PriceSpy.Web.Models
         }
         private static string GetPictureFromAttribute(string pictureNode, string prefixNode, HtmlNode cardNode, string pictureAttribute)
         {
-            string? cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == pictureAttribute)?.Value;
+            string? cardPicture = "SadClient.jpg";
+            if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "SadClient.jpg";
+            cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == pictureAttribute)?.Value;
             if (!String.IsNullOrEmpty(cardPicture))
             {
                 cardPicture = string.Concat(prefixNode, cardPicture);
@@ -223,13 +229,17 @@ namespace PriceSpy.Web.Models
         }
         private static string GetCatNumber(string catNumberNode, HtmlNode cardNode)
         {
-            string? cardCatNumber = cardNode.SelectSingleNode(catNumberNode)?.InnerText.Trim();
+            string? cardCatNumber = String.Empty;
+            if (cardNode.SelectSingleNode(catNumberNode) == null) return cardCatNumber = "-----";
+            cardCatNumber = cardNode.SelectSingleNode(catNumberNode)?.InnerText.Trim();
             if (String.IsNullOrEmpty(cardCatNumber)) cardCatNumber = "-----";
             return cardCatNumber;
         }
         private static string GetStatus(string statusNode, HtmlNode cardNode)
         {
-            string? cardStatus = cardNode.SelectSingleNode(statusNode)?.InnerText.Trim();
+            string? cardStatus = "Неизвестный статус";
+            if (cardNode.SelectSingleNode(statusNode) == null) return cardStatus = "Неизвестный статус";
+            cardStatus = cardNode.SelectSingleNode(statusNode)?.InnerText.Trim();
             if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
             return cardStatus;
         }
@@ -244,7 +254,9 @@ namespace PriceSpy.Web.Models
         };
         private static string GetBelagroStatus(string statusNode, HtmlNode cardNode)
         {
-            string? cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();
+            string? cardStatus = "Неизвестный статус";
+            if (cardNode.SelectSingleNode(statusNode) == null) return cardStatus = "Неизвестный статус";
+            cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();
             if (cardStatus == "city store-none") cardStatus = "Под заказ";
             if (cardStatus == "city") cardStatus = "В наличии";
             if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
@@ -252,7 +264,9 @@ namespace PriceSpy.Web.Models
         }
         private static string GetCardUrl(string cardUrlNode, HtmlNode cardNode)
         {
-            string? cardUrl = cardNode.SelectSingleNode(cardUrlNode).Attributes.FirstOrDefault(x => x.Name == "href")?.Value ?? string.Empty;
+            string? cardUrl = String.Empty;
+            if (cardNode.SelectSingleNode(cardUrlNode) == null) return cardUrl = String.Empty;
+            cardUrl = cardNode.SelectSingleNode(cardUrlNode).Attributes.FirstOrDefault(x => x.Name == "href")?.Value ?? string.Empty;
             return cardUrl;
         }
         private static string Splite(ref string cardName)

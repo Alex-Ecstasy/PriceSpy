@@ -7,10 +7,11 @@
 $(function () {
     var input = document.querySelector("#search-box");
     var button = document.querySelector("#search-button");
+    var rate = document.querySelector("#rate");
 
     button.onclick = function () {
         if (input.value) {
-            location.href = "/?searchQuery=" + input.value;
+            location.href = "/?searchQuery=" + input.value + "&Rate=" + rate.value;
         }
     }
     input.addEventListener("keypress", function (event) {

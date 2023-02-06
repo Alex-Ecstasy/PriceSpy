@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PriceSpy.Web.Models;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace PriceSpy.Web.Controllers
 {
@@ -17,7 +18,7 @@ namespace PriceSpy.Web.Controllers
             htmlReader = new HtmlReader();
         }
 
-        public async Task<IActionResult> Index(string searchQuery, CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(string searchQuery, string rate, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(searchQuery))
             {
@@ -31,6 +32,9 @@ namespace PriceSpy.Web.Controllers
             var belagroResult = await htmlReader.GetBelagroResult(searchQuery, cancellationToken);
             //var mazrezervResult = await htmlReader.GetMazrezervResult(searchQuery, cancellationToken);
 
+            float rateExchange = 1;
+            float.TryParse(rate, NumberStyles.Any, CultureInfo.InvariantCulture, out rateExchange);
+            SampleViewModel.Rate = rateExchange;
             SampleViewModel.Search = searchQuery;
 
             sampleViewModel.Sites.Add(turbokResult);

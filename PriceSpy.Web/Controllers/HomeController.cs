@@ -32,8 +32,9 @@ namespace PriceSpy.Web.Controllers
             var belagroResult = await htmlReader.GetBelagroResult(searchQuery, cancellationToken);
             //var mazrezervResult = await htmlReader.GetMazrezervResult(searchQuery, cancellationToken);
 
-            float rateExchange = 1;
-            float.TryParse(rate, NumberStyles.Any, CultureInfo.InvariantCulture, out rateExchange);
+           
+            rate = rate.Replace(".", ",");
+            if (!float.TryParse(rate, out float rateExchange)) rateExchange = 1;
             SampleViewModel.Rate = rateExchange;
             SampleViewModel.Search = searchQuery;
 

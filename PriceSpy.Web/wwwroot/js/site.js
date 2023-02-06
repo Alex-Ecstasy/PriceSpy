@@ -20,4 +20,10 @@ $(function () {
             document.querySelector("#search-button").click();
         }
     })
+    rate.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.querySelector("#search-button").click();
+        }
+    })
 });

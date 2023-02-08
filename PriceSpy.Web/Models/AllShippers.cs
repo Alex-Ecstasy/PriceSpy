@@ -2,8 +2,8 @@
 {
     public class Element
     {
-        public string? Name { get; set; }  = "Default";
-        public string? CatNumber { get; set; } = "Default";
+        public string Name { get; set; }  = "Default";
+        public string CatNumber { get; set; } = "Default";
         public float? Price { get; set; } = 0;
         
     }
@@ -11,6 +11,7 @@
     {
         public ICollection<Element> Elements { get; set; } = new List<Element>();
         public string PriceFile { get; set; }
+        public bool IsRub { get; set; }
         public Shipper(string path, string name)
         {
             PriceFile = path;

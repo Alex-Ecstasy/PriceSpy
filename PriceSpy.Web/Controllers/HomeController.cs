@@ -24,7 +24,12 @@ namespace PriceSpy.Web.Controllers
             {
                 return View();
             }
+
+
             SampleViewModel sampleViewModel = new SampleViewModel();
+            rate = rate.Replace(".", ",");
+            if (!float.TryParse(rate, out float rateExchange)) rateExchange = 1;
+            SampleViewModel.Rate = rateExchange;
             XmlHandler.Read(sampleViewModel);
             var turbokResult = await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken);
             var magnitResult = await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken);
@@ -33,8 +38,7 @@ namespace PriceSpy.Web.Controllers
             //var mazrezervResult = await htmlReader.GetMazrezervResult(searchQuery, cancellationToken);
 
            
-            rate = rate.Replace(".", ",");
-            if (!float.TryParse(rate, out float rateExchange)) rateExchange = 1;
+
             SampleViewModel.Rate = rateExchange;
             SampleViewModel.Search = searchQuery;
 

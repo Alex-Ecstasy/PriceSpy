@@ -10,7 +10,7 @@ namespace PriceSpy.Web.Models
             string pathWithPrices = (AppDomain.CurrentDomain.BaseDirectory + "Prices");
             DirectoryInfo fileList = new DirectoryInfo(pathWithPrices);
 
-
+            if (fileList.Exists)
             foreach (FileInfo file in fileList.GetFiles("*.xml"))
             {
                 Shipper shipper = new Shipper(file.FullName, file.Name.Substring(0, file.Name.Length - 4));
@@ -31,13 +31,14 @@ namespace PriceSpy.Web.Models
                 }
                 allShippers.shippers.Add(shipper);
             }
-
+            /// else Not Files Found or Not found dirrectory
         }
 
 
         public static void Search(SampleViewModel allShippers, string searchQuery)
         {
-            //string? search = Console.ReadLine();
+            
+            SampleViewModel.TotalCount = 0;
             foreach (Shipper shipper in allShippers.shippers)
             {
                 Console.WriteLine("Выполняется поиск в " + shipper.Name);
@@ -46,6 +47,7 @@ namespace PriceSpy.Web.Models
                                    where item.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) || item.CatNumber.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)
                                    select item;
                 shipper.SelectedElements = findElements.ToList();
+                SampleViewModel.TotalCount += shipper.SelectedElements.Count;
             }
         }
     }

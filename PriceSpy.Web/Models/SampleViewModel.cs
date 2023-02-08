@@ -33,5 +33,6 @@
         public static string? Search { get; set;}
         public static float Rate { get; set;}
         public ICollection<Shipper> shippers { get; set; } = new List<Shipper>();
+        public static int TotalCount { get; set; }
     }
 }

@@ -6,6 +6,8 @@ using System.Text;
 using System.Xml.Linq;
 using static System.Text.Encoding;
 using static System.Net.WebRequestMethods;
+using static System.Net.Mime.MediaTypeNames;
+using System.Reflection;
 
 namespace PriceSpy.Web.Models
 {
@@ -15,181 +17,249 @@ namespace PriceSpy.Web.Models
         public HtmlReader()
         {
             this.httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
         public async Task<Seller> GetTurbokResultsAsync(string search, CancellationToken cancellationToken)
         {
-            var httpResult = await httpClient.GetAsync($"https://turbok.by/search?gender=&gender=&catlist=0&searchText={search}", cancellationToken);
-            if (!httpResult.IsSuccessStatusCode)
-                //throw new Exception("Turbok wrong");
-                return null;
-            var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
-            var siteModel = new Seller { Name = "Turbok" };
-
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(htmlResult);
-            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"changeGrid\"]");
-            if (nodes != null)
+            var siteModel = new Seller ("Turbok", "https://turbok.by");
+            ResponseContent responseContent = new();
+            try
             {
-                foreach (var cardNode in nodes)
+                
+                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/search?gender=&gender=&catlist=0&searchText={search}", cancellationToken);
+                
+                if (!httpResult.IsSuccessStatusCode) return siteModel;
+                else
                 {
-                    Card card = new Card();
-                    card.UrlPrefix = "https://turbok.by";
-                    card.Name = GetName("div[2]/div[1]/div[1]", cardNode);
-                    card.Price = GetPrice("div[2]/div[2]/div", cardNode);
-                    card.Picture = GetPicture("div[1]/a/div/img", cardNode);
-                    card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
-                    card.Status = GetStatus("div[2]/div[1]/p", cardNode);
-                    card.IsAvailable = GetAvailable(card.Status);
-                    card.CardUrl = GetCardUrl("div[1]/a", cardNode);
-                    siteModel.CardList.Add(card);
+                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(htmlResult);
+                    siteModel.IsAvailable = true;
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"changeGrid\"]");
+                    if (nodes != null)
+                    {
+                        foreach (var cardNode in nodes)
+                        {
+                            Card card = new Card();
+                            card.UrlPrefix = siteModel.Host;
+                            card.Name = GetName("div[2]/div[1]/div[1]", cardNode);
+                            card.Price = GetPrice("div[2]/div[2]/div", cardNode);
+                            card.Picture = GetPicture("div[1]/a/div/img", cardNode);
+                            card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
+                            card.Status = GetStatus("div[2]/div[1]/p", cardNode);
+                            card.IsAvailable = GetAvailable(card.Status);
+                            card.CardUrl = GetCardUrl("div[1]/a", cardNode);
+                            siteModel.CardList.Add(card);
+                        }
+                        siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+                    }
                 }
-                siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
             }
+
+            catch (Exception ex)
+            {
+                responseContent.Message = ex.ToString();
+                responseContent.isAvailable = false;
+            }
+
             return siteModel;
+
         }
         public async Task<Seller> GetMagnitResultAsync(string search, CancellationToken cancellationToken)
         {
-            var httpResult = await httpClient.GetAsync($"https://minskmagnit.by/site_search?search_term={search}", cancellationToken);
-            if (!httpResult.IsSuccessStatusCode)
-                //throw new Exception("Magnit wrong");
-                return null;
-            var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
-            var siteModel = new Seller { Name = "Minskmagnit" };
+            var siteModel = new Seller("Minskmagnit", "https://minskmagnit.by");
+            ResponseContent responseContent = new();
 
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(htmlResult);
-            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("/html/body/main/div/article/div/section/ul/li");
-            if (nodes != null)
+            try
             {
-                foreach (var cardNode in nodes)
+                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/site_search?search_term={search}", cancellationToken);
+
+                if (!httpResult.IsSuccessStatusCode) return siteModel;
+                else
                 {
-                    Card card = new Card();
-                    card.UrlPrefix = "https://minskmagnit.by";
-                    card.Name = GetName("div/div[2]/div[1]/div", cardNode);
-                    card.Price = GetPrice("div/div[2]/div[2]/div", cardNode);
-                    card.Picture = GetPicture("div/div[1]/a/img", cardNode);
-                    card.CatNumber = GetCatNumber("div/div[2]/div[1]/span", cardNode);
-                    card.Status = GetStatus("div/div[2]/div[2]/div[2]/span[1]", cardNode);
-                    card.IsAvailable = GetAvailable(card.Status);
-                    card.CardUrl = GetCardUrl("div/div[2]/div[1]", cardNode);
-                    card.Name = card.Name.Replace(card.CatNumber, "");
-                    siteModel.CardList.Add(card);
+                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(htmlResult);
+                    siteModel.IsAvailable = true;
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("/html/body/main/div/article/div/section/ul/li");
+                    if (nodes != null)
+                    {
+                        siteModel.IsAvailable = true;
+                        foreach (var cardNode in nodes)
+                        {
+                            Card card = new Card();
+                            card.UrlPrefix = siteModel.Host;
+                            card.Name = GetName("div/div[2]/div[1]/div", cardNode);
+                            card.Price = GetPrice("div/div[2]/div[2]/div", cardNode);
+                            card.Picture = GetPicture("div/div[1]/a/img", cardNode);
+                            card.CatNumber = GetCatNumber("div/div[2]/div[1]/span", cardNode);
+                            card.Status = GetStatus("div/div[2]/div[2]/div[2]/span[1]", cardNode);
+                            card.IsAvailable = GetAvailable(card.Status);
+                            card.CardUrl = GetCardUrl("div/div[1]/a", cardNode);
+                            card.Name = card.Name.Replace(card.CatNumber, "");
+                            siteModel.CardList.Add(card);
+                        }
+                        siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+                    }
                 }
-                siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
             }
+            catch (Exception ex)
+            {
+                responseContent.Message = ex.ToString();
+                responseContent.isAvailable = false;
+            }
+
+
             return siteModel;
         }
         public async Task<Seller> GetAkvilonResultAsync(string search, CancellationToken cancellationToken)
         {
-            var httpResult = await httpClient.GetAsync($"https://akvilonavto.by/catalog/?q={search}", cancellationToken);
-            if (!httpResult.IsSuccessStatusCode)
-                //throw new Exception("Akvilon wrong");
-                return null;
-            var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
-            var siteModel = new Seller { Name = "Akvilon" };
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(htmlResult);
-            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"view-showcase\"]/div");
-            if (nodes != null)
+            var siteModel = new Seller("Akvilon", "https://akvilonavto.by");
+            ResponseContent responseContent = new();
+            try
             {
-                foreach (var cardNode in nodes)
+                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/catalog/?q={search}", cancellationToken);
+                
+                if (!httpResult.IsSuccessStatusCode) return siteModel;
+                else
                 {
-                    Card card = new Card();
-                    string name = GetName("div/div[1]/div[2]/div[1]", cardNode);
-                    string pictureAttribute = "data-src";
-                    card.UrlPrefix = "https://akvilonavto.by";
-                    card.Price = GetPrice("div/div[1]/div[3]/div/span/span[2]", cardNode);
-                    card.Picture = GetPictureFromAttribute("div/div[1]/div[1]/div[1]/a/img", card.UrlPrefix, cardNode, pictureAttribute);
-                    card.CatNumber = Splite(ref name);
-                    card.Name = name;
-                    card.Status = GetStatus("div/div[2]/div[1]/div[1]/div/div/span/span", cardNode);
-                    card.IsAvailable = GetAvailable(card.Status);
-                    card.CardUrl = GetCardUrl("div/div[1]/div[1]/div[1]/a", cardNode);
-                    siteModel.CardList.Add(card);
+                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(htmlResult);
+                    siteModel.IsAvailable = true;
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"view-showcase\"]/div");
+                    if (nodes != null)
+                    {
+                        foreach (var cardNode in nodes)
+                        {
+                            Card card = new Card();
+                            card.UrlPrefix = siteModel.Host;
+                            string name = GetName("div/div[1]/div[2]/div[1]", cardNode);
+                            string pictureAttribute = "data-src";
+                            card.Price = GetPrice("div/div[1]/div[3]/div/span/span[2]", cardNode);
+                            card.Picture = GetPictureFromAttribute("div/div[1]/div[1]/div[1]/a/img", card.UrlPrefix, cardNode, pictureAttribute);
+                            card.CatNumber = Splite(ref name);
+                            card.Name = name;
+                            card.Status = GetStatus("div/div[2]/div[1]/div[1]/div/div/span/span", cardNode);
+                            card.IsAvailable = GetAvailable(card.Status);
+                            card.CardUrl = GetCardUrl("div/div[1]/div[1]/div[1]/a", cardNode);
+                            siteModel.CardList.Add(card);
+                        }
+                        siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+                    }
                 }
-                siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
             }
+
+            catch (Exception ex)
+            {
+                responseContent.Message = ex.ToString();
+                responseContent.isAvailable = false;
+            }
+
             return siteModel;
         }
         public async Task<Seller> GetBelagroResult(string search, CancellationToken cancellationToken)
         {
-
-            var httpResult = await httpClient.GetAsync($"https://1belagro.by/search/?q={search}", cancellationToken);
-            if (!httpResult.IsSuccessStatusCode)
-                //throw new Exception("Belagro wrong");
-                return null;
-            var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
-            var siteModel = new Seller { Name = "Belagro" };
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(htmlResult);
-            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"search_catalog\"]/table/tbody/tr");
-            if (nodes != null)
+            var siteModel = new Seller("Belagro", "https://1belagro.by");
+            ResponseContent responseContent = new();
+            try
             {
-                foreach (var cardNode in nodes)
+                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/search/?q={search}", cancellationToken);
+                if (!httpResult.IsSuccessStatusCode) return siteModel;
+                else
                 {
-                    Card card = new Card();
-                    string name = GetName("td/a", cardNode);
-                    string pictureAttribute = "href";
-                    card.UrlPrefix = "https://1belagro.by";
-                    card.Price = GetPrice("td[2]/div[2]", cardNode);
-                    card.Picture = GetPictureFromAttribute("td[1]/div/a", card.UrlPrefix, cardNode, pictureAttribute);
-                    card.CatNumber = SpliteBelagro(ref name);
-                    card.Name = name;
-                    card.Status = GetBelagroStatus("td[1]/div/div/span", cardNode);
-                    card.IsAvailable = GetAvailable(card.Status);
-                    card.CardUrl = GetCardUrl("td[1]/a", cardNode);
-                    siteModel.CardList.Add(card);
+                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(htmlResult);
+                    siteModel.IsAvailable = true;
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"search_catalog\"]/table/tbody/tr");
+                    if (nodes != null)
+                    {
+                        foreach (var cardNode in nodes)
+                        {
+                            Card card = new Card();
+                            card.UrlPrefix = siteModel.Host;
+                            string name = GetName("td/a", cardNode);
+                            string pictureAttribute = "href";
+                            card.Price = GetPrice("td[2]/div[2]", cardNode);
+                            card.Picture = GetPictureFromAttribute("td[1]/div/a", card.UrlPrefix, cardNode, pictureAttribute);
+                            card.CatNumber = SpliteBelagro(ref name);
+                            card.Name = name;
+                            card.Status = GetBelagroStatus("td[1]/div/div/span", cardNode);
+                            card.IsAvailable = GetAvailable(card.Status);
+                            card.CardUrl = GetCardUrl("td[1]/a", cardNode);
+                            siteModel.CardList.Add(card);
+                        }
+                        siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+                    }
                 }
-                siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
             }
+            catch (Exception ex)
+            {
+                responseContent.Message = ex.ToString();
+                responseContent.isAvailable = false;
+            }
+
             return siteModel;
+
+
         }
         public async Task<Seller> GetMazrezervResult(string search, CancellationToken cancellationToken)
         {
-            httpClient.DefaultRequestHeaders.Clear();
-            var httpResult = await httpClient.GetAsync($"https://www.mazrezerv.ru/price/?caption={search}&search=full", cancellationToken);
-            if (!httpResult.IsSuccessStatusCode)
-                //throw new Exception("Mazrezerv wrong");
-                return null;
-            var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
-            //var res = await httpResult.Content();
-            //string htmlResult = null;
-            //var buffer = await httpResult.Content.ReadAsByteArrayAsync();
-            //byte[] bytes = buffer.ToArray();
-            //string htmlResult = encoding.GetString(bytes, 0, bytes.Length);
-            //using (var sr = new StreamReader(await httpResult.Content.ReadAsStreamAsync(), Encoding.UTF8))
-            //{
-            //    htmlResult = sr.ReadToEnd();
-            //}
-            var siteModel = new Seller { Name = "Mazrezerv" };
+            var siteModel = new Seller("Mazrezerv", "https://www.mazrezerv.ru");
+            ResponseContent responseContent = new();
 
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(htmlResult);
-            HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"print\"]/table/tr");
-            if (nodes != null)
+            try
             {
-                foreach (var cardNode in nodes)
+                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/price/?caption={search}&search=full", cancellationToken);
+                if (!httpResult.IsSuccessStatusCode) return siteModel;
+                else
                 {
-                    //Card card = new Card();
-                    //card.UrlPrefix = "https://www.mazrezerv.ru";
-                    //card.Name = GetName("div[2]/div[1]/div[1]", cardNode);
-                    //card.Price = GetPrice("div[2]/div[2]/div", cardNode);
-                    //card.Picture = GetPicture("div[1]/a/div/img", cardNode);
-                    //card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
-                    //card.Status = GetStatus("div[2]/div[1]/p", cardNode);
-                    //if (card.Status == "В наличии") card.IsAvailable = true;
-                    //card.CardUrl = GetCardUrl("div[1]/a", cardNode);
-                    //siteModel.CardList.Add(card);
+                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(htmlResult);
+                    siteModel.IsAvailable = true;
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"print\"]/table/tr");
+                    if (nodes != null)
+                    {
+                        
+                        foreach (var cardNode in nodes.Skip(2))
+                        {
+                            Card card = new Card();
+                            card.UrlPrefix = siteModel.Host;
+                            card.Name = GetName("td[3]", cardNode);
+                            card.Price = GetPrice("td[7]", cardNode) * SampleViewModel.Rate;
+                            string pictureAttribute = "href";
+                            card.Picture = GetPictureFromAttribute("td[2]/a", card.UrlPrefix, cardNode, pictureAttribute);
+                            card.CatNumber = GetCatNumber("td[4]", cardNode);
+                            card.Status = GetStatus("td[6]/b", cardNode);
+                            if (card.Status == "нет в наличии") card.IsAvailable = false;
+                            else
+                            {
+                                card.IsAvailable = true;
+                                card.Status = $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт.";
+                            }
+                            card.CardUrl = GetCardUrl("td[3]/a", cardNode);
+                            siteModel.CardList.Add(card);
+                        }
+                        siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+                    }
                 }
-                siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
             }
+            catch (Exception ex)
+            {
+                responseContent.Message = ex.ToString();
+                responseContent.isAvailable = false;
+            }
+
             return siteModel;
         }
         private static string GetName(string nameNode, HtmlNode cardNode)
         {
             string? cardName = String.Empty;
             if (cardNode.SelectSingleNode(nameNode) == null) return cardName = "-----";
-            cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim().Replace("&#34;", "") ?? string.Empty;
+            cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim().Replace("&#34;", "").Replace("&quot;", "") ?? string.Empty;
             if (cardName == string.Empty) cardName = "-----";
             return cardName;
         }

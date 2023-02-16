@@ -7,20 +7,21 @@
         public float? Price { get; set; } = 0;
         
     }
-    public class Shipper : Seller
+    public class Shipper
     {
-        public ICollection<Element> Elements { get; set; } = new List<Element>();
+        public string Name { get; private set; }
         public string PriceFile { get; set; }
         public bool IsRub { get; set; }
-        public Shipper(string path, string name)
-        {
-            PriceFile = path;
-            Name = name;
-        }
+        public ICollection<Element> Elements { get; set; } = new List<Element>();
         public ICollection<Element> SelectedElements { get; set; } = new List<Element>();
         public int SelectedCount
         {
             get { return SelectedElements.Count; }
+        }
+        public Shipper(string path, string name)
+        {
+            PriceFile = path;
+            Name = name;
         }
     }
 }

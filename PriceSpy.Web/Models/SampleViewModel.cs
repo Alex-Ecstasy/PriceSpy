@@ -14,7 +14,9 @@
 
     public class Seller
     {
-        public string? Name { get; set; }
+        public string Name { get; set; }
+        public bool IsAvailable { get; set; }
+        public string Host { get; set; }
        
         public ICollection<Card> CardList { get; set; } = new List<Card>();
 
@@ -25,14 +27,20 @@
                 return CardList.Count;
             }
         }
+        public Seller(string name, string host)
+        {
+            Name = name;
+            Host = host;
+        }
     }
 
     public class SampleViewModel
     {
-        public ICollection<Seller> Sites { get; set; } = new List<Seller>();
+
         public static string? Search { get; set;}
         public static float Rate { get; set;}
-        public ICollection<Shipper> shippers { get; set; } = new List<Shipper>();
         public static int TotalCount { get; set; }
+        public ICollection<Shipper> shippers { get; set; } = new List<Shipper>();
+        public ICollection<Seller> Sites { get; set; } = new List<Seller>();
     }
 }

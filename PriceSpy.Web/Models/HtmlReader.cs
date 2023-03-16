@@ -229,7 +229,7 @@ namespace PriceSpy.Web.Models
                             card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
                             card.CatNumber = SpliteBelagro(ref name);
                             card.Name = name;
-                            card.Status = GetBelagroStatus(siteNode.StatusNode, cardNode);
+                            card.Status = GetStatus(siteNode.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
                             card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
@@ -258,7 +258,7 @@ namespace PriceSpy.Web.Models
                 PictureNode = "td[2]/a",
                 PictureAttribute = "href",
                 CatNumberNode = "td[4]",
-                StatusNode = "td[6]/b",
+                StatusNode = "td[5]",
                 CardUrlNode = "td[3]/a"
             };
 
@@ -287,12 +287,18 @@ namespace PriceSpy.Web.Models
                             card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
                             card.CatNumber = GetCatNumber(siteNode.CatNumberNode, cardNode);
                             card.Status = GetStatus(siteNode.StatusNode, cardNode);
-                            if (card.Status == "нет в наличии") card.IsAvailable = false;
+                            card.IsAvailable = GetAvailable(card.Status);
+                            if (card.Status == "0")
+                            {
+                                card.IsAvailable = false;
+                                card.Status = "Нет в наличии";
+                            }
                             else
                             {
                                 card.IsAvailable = true;
                                 card.Status = $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт.";
                             }
+
                             card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
                         }
@@ -355,28 +361,22 @@ namespace PriceSpy.Web.Models
             string? cardStatus = "Неизвестный статус";
             if (cardNode.SelectSingleNode(statusNode) == null) return cardStatus = "Неизвестный статус";
             cardStatus = cardNode.SelectSingleNode(statusNode)?.InnerText.Trim();
+            if (cardStatus == "Минск")
+                cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();
+            if (cardStatus == "city store-none") return cardStatus = "Под заказ";
+            if (cardStatus == "city") return cardStatus = "В наличии";
             if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
             return cardStatus;
         }
-        private static bool GetAvailable(string statusNode) => statusNode switch
+        private static bool GetAvailable(string statusNode) => statusNode.ToLower() switch
         {
-            "Нет в наличии" => false,
-            "Неизвестный статус" => false,
-            "Под заказ" => false,
-            "В наличии" => true,
-            "Менее 10 шт" => true,
+            "нет в наличии" => false,
+            "неизвестный статус" => false,
+            "под заказ" => false,
+            "в наличии" => true,
+            "менее 10 шт" => true,
             _ => false
         };
-        private static string GetBelagroStatus(string statusNode, HtmlNode cardNode)
-        {
-            string? cardStatus = "Неизвестный статус";
-            if (cardNode.SelectSingleNode(statusNode) == null) return cardStatus = "Неизвестный статус";
-            cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();
-            if (cardStatus == "city store-none") cardStatus = "Под заказ";
-            if (cardStatus == "city") cardStatus = "В наличии";
-            if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
-            return cardStatus;
-        }
         private static string GetCardUrl(string cardUrlNode, HtmlNode cardNode)
         {
             string? cardUrl = String.Empty;

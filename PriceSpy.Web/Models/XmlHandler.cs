@@ -30,7 +30,7 @@ namespace PriceSpy.Web.Models
                     element.Price = price;
                     shipper.Elements.Add(element);
                 }
-                allShippers.shippers.Add(shipper);
+                allShippers.Shippers.Add(shipper);
             }
             /// else Not Files Found or Not found dirrectory
         }
@@ -40,7 +40,7 @@ namespace PriceSpy.Web.Models
         {
             
             SampleViewModel.TotalCount = 0;
-            foreach (Shipper shipper in allShippers.shippers)
+            foreach (Shipper shipper in allShippers.Shippers)
             {
                 Console.WriteLine("Выполняется поиск в " + shipper.Name);
 

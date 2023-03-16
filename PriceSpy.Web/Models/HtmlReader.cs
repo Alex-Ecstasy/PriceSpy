@@ -22,6 +22,17 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetTurbokResultsAsync(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller ("Turbok", "https://turbok.by");
+            var siteNode = new SellerNodes
+            {
+                NameNode = "div[2]/div[1]/div[1]",
+                PriceNode = "div[2]/div[2]/div",
+                PictureNode = "div[1]/a/div/img",
+                PictureAttribute = "src",
+                CatNumberNode = "div[2]/div[1]/div[2]/p[1]",
+                StatusNode = "div[2]/div[1]/p",
+                CardUrlNode = "div[1]/a"
+            };
+
             ResponseContent responseContent = new();
             try
             {
@@ -42,13 +53,13 @@ namespace PriceSpy.Web.Models
                         {
                             Card card = new Card();
                             card.UrlPrefix = siteModel.Host;
-                            card.Name = GetName("div[2]/div[1]/div[1]", cardNode);
-                            card.Price = GetPrice("div[2]/div[2]/div", cardNode);
-                            card.Picture = GetPicture("div[1]/a/div/img", cardNode);
-                            card.CatNumber = GetCatNumber("div[2]/div[1]/div[2]/p[1]", cardNode);
-                            card.Status = GetStatus("div[2]/div[1]/p", cardNode);
+                            card.Name = GetName(siteNode.NameNode, cardNode);
+                            card.Price = GetPrice(siteNode.PriceNode, cardNode);
+                            card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
+                            card.CatNumber = GetCatNumber(siteNode.CatNumberNode, cardNode);
+                            card.Status = GetStatus(siteNode.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
-                            card.CardUrl = GetCardUrl("div[1]/a", cardNode);
+                            card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
                         }
                         siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
@@ -68,6 +79,17 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetMagnitResultAsync(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller("Minskmagnit", "https://minskmagnit.by");
+            var siteNode = new SellerNodes
+            {
+                NameNode = "div/div[2]/div[1]/div",
+                PriceNode = "div/div[2]/div[2]/div",
+                PictureNode = "div/div[1]/a/img",
+                PictureAttribute = "src",
+                CatNumberNode = "div/div[2]/div[1]/span",
+                StatusNode = "div/div[2]/div[2]/div[2]/span[1]",
+                CardUrlNode = "div/div[1]/a"
+            };
+
             ResponseContent responseContent = new();
 
             try
@@ -90,13 +112,13 @@ namespace PriceSpy.Web.Models
                         {
                             Card card = new Card();
                             card.UrlPrefix = siteModel.Host;
-                            card.Name = GetName("div/div[2]/div[1]/div", cardNode);
-                            card.Price = GetPrice("div/div[2]/div[2]/div", cardNode);
-                            card.Picture = GetPicture("div/div[1]/a/img", cardNode);
-                            card.CatNumber = GetCatNumber("div/div[2]/div[1]/span", cardNode);
-                            card.Status = GetStatus("div/div[2]/div[2]/div[2]/span[1]", cardNode);
+                            card.Name = GetName(siteNode.NameNode, cardNode);
+                            card.Price = GetPrice(siteNode.PriceNode, cardNode);
+                            card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
+                            card.CatNumber = GetCatNumber(siteNode.CatNumberNode, cardNode);
+                            card.Status = GetStatus(siteNode.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
-                            card.CardUrl = GetCardUrl("div/div[1]/a", cardNode);
+                            card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             card.Name = card.Name.Replace(card.CatNumber, "");
                             siteModel.CardList.Add(card);
                         }
@@ -116,6 +138,17 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetAkvilonResultAsync(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller("Akvilon", "https://akvilonavto.by");
+            var siteNode = new SellerNodes
+            {
+                NameNode = "div/div[1]/div[2]/div[1]",
+                PriceNode = "div/div[1]/div[3]/div/span/span[2]",
+                PictureNode = "div/div[1]/div[1]/div[1]/a/img",
+                PictureAttribute = "data-src",
+                CatNumberNode = "",
+                StatusNode = "div/div[2]/div[1]/div[1]/div/div/span/span",
+                CardUrlNode = "div/div[1]/div[1]/div[1]/a"
+            };
+
             ResponseContent responseContent = new();
             try
             {
@@ -135,15 +168,14 @@ namespace PriceSpy.Web.Models
                         {
                             Card card = new Card();
                             card.UrlPrefix = siteModel.Host;
-                            string name = GetName("div/div[1]/div[2]/div[1]", cardNode);
-                            string pictureAttribute = "data-src";
-                            card.Price = GetPrice("div/div[1]/div[3]/div/span/span[2]", cardNode);
-                            card.Picture = GetPictureFromAttribute("div/div[1]/div[1]/div[1]/a/img", card.UrlPrefix, cardNode, pictureAttribute);
+                            string name = GetName(siteNode.NameNode, cardNode);
+                            card.Price = GetPrice(siteNode.PriceNode, cardNode);
+                            card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
                             card.CatNumber = Splite(ref name);
                             card.Name = name;
-                            card.Status = GetStatus("div/div[2]/div[1]/div[1]/div/div/span/span", cardNode);
+                            card.Status = GetStatus(siteNode.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
-                            card.CardUrl = GetCardUrl("div/div[1]/div[1]/div[1]/a", cardNode);
+                            card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
                         }
                         siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
@@ -162,6 +194,17 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetBelagroResult(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller("Belagro", "https://1belagro.by");
+            var siteNode = new SellerNodes
+            {
+                NameNode = "td/a",
+                PriceNode = "td[2]/div[2]",
+                PictureNode = "td[1]/div/a",
+                PictureAttribute = "href",
+                CatNumberNode = "",
+                StatusNode = "td[1]/div/div/span",
+                CardUrlNode = "td[1]/a"
+            };
+
             ResponseContent responseContent = new();
             try
             {
@@ -180,15 +223,15 @@ namespace PriceSpy.Web.Models
                         {
                             Card card = new Card();
                             card.UrlPrefix = siteModel.Host;
-                            string name = GetName("td/a", cardNode);
+                            string name = GetName(siteNode.NameNode, cardNode);
                             string pictureAttribute = "href";
-                            card.Price = GetPrice("td[2]/div[2]", cardNode);
-                            card.Picture = GetPictureFromAttribute("td[1]/div/a", card.UrlPrefix, cardNode, pictureAttribute);
+                            card.Price = GetPrice(siteNode.PriceNode, cardNode);
+                            card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
                             card.CatNumber = SpliteBelagro(ref name);
                             card.Name = name;
-                            card.Status = GetBelagroStatus("td[1]/div/div/span", cardNode);
+                            card.Status = GetBelagroStatus(siteNode.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
-                            card.CardUrl = GetCardUrl("td[1]/a", cardNode);
+                            card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
                         }
                         siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
@@ -208,6 +251,17 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetMazrezervResult(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller("Mazrezerv", "https://www.mazrezerv.ru");
+            var siteNode = new SellerNodes
+            {
+                NameNode = "td[3]",
+                PriceNode = "td[7]",
+                PictureNode = "td[2]/a",
+                PictureAttribute = "href",
+                CatNumberNode = "td[4]",
+                StatusNode = "td[6]/b",
+                CardUrlNode = "td[3]/a"
+            };
+
             ResponseContent responseContent = new();
 
             try
@@ -228,19 +282,18 @@ namespace PriceSpy.Web.Models
                         {
                             Card card = new Card();
                             card.UrlPrefix = siteModel.Host;
-                            card.Name = GetName("td[3]", cardNode);
-                            card.Price = GetPrice("td[7]", cardNode) * SampleViewModel.Rate;
-                            string pictureAttribute = "href";
-                            card.Picture = GetPictureFromAttribute("td[2]/a", card.UrlPrefix, cardNode, pictureAttribute);
-                            card.CatNumber = GetCatNumber("td[4]", cardNode);
-                            card.Status = GetStatus("td[6]/b", cardNode);
+                            card.Name = GetName(siteNode.NameNode, cardNode);
+                            card.Price = GetPrice(siteNode.PriceNode, cardNode) * SampleViewModel.Rate;
+                            card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
+                            card.CatNumber = GetCatNumber(siteNode.CatNumberNode, cardNode);
+                            card.Status = GetStatus(siteNode.StatusNode, cardNode);
                             if (card.Status == "нет в наличии") card.IsAvailable = false;
                             else
                             {
                                 card.IsAvailable = true;
                                 card.Status = $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт.";
                             }
-                            card.CardUrl = GetCardUrl("td[3]/a", cardNode);
+                            card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
                         }
                         siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
@@ -272,21 +325,13 @@ namespace PriceSpy.Web.Models
             if (isRightPrice) cardPrice = price;
             return cardPrice;
         }
-        private static string GetPicture(string pictureNode, HtmlNode cardNode)
-        {
-            string? cardPicture = "SadClient.jpg";
-            if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "SadClient.jpg";
-            cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == "src")?.Value ?? string.Empty;
-            if (string.IsNullOrEmpty(cardPicture)) cardPicture = cardNode.SelectSingleNode("div/div[1]/div[1]/div[1]/a/img")?.Attributes.FirstOrDefault(x => x.Name == "data-src")?.Value;
-            if (String.IsNullOrEmpty(cardPicture)) cardPicture = "SadClient.jpg";
-            if (cardPicture == "https://turbok.by/img/no-photo--lg.png") cardPicture = "SadClient.jpg";
-            return cardPicture;
-        }
-        private static string GetPictureFromAttribute(string pictureNode, string prefixNode, HtmlNode cardNode, string pictureAttribute)
+        private static string GetPicture(string pictureNode, string prefixNode, HtmlNode cardNode, string pictureAttribute)
         {
             string? cardPicture = "SadClient.jpg";
             if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "SadClient.jpg";
             cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == pictureAttribute)?.Value;
+            if (cardPicture == "https://turbok.by/img/no-photo--lg.png") return cardPicture = "SadClient.jpg";
+            if (prefixNode == "https://turbok.by" || prefixNode == "https://minskmagnit.by") return cardPicture;
             if (!String.IsNullOrEmpty(cardPicture))
             {
                 cardPicture = string.Concat(prefixNode, cardPicture);

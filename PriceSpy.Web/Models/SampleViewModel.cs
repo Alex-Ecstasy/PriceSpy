@@ -36,14 +36,14 @@
 
     public class SellerNodes
     {
-        public string NameNode { get; set; }
-        public string PriceNode { get; set; }
-        public string PictureNode { get; set; }
-        public string PictureAttribute { get; set; }
-        public string CatNumberNode { get; set; }
-        public string StatusNode { get; set; }
-        public string CardUrlNode { get; set; }
-        public string UrlPrefixNode { get; set; }
+        public string? NameNode { get; set; }
+        public string? PriceNode { get; set; }
+        public string? PictureNode { get; set; }
+        public string? PictureAttribute { get; set; }
+        public string? CatNumberNode { get; set; }
+        public string? StatusNode { get; set; }
+        public string? CardUrlNode { get; set; }
+        public string? UrlPrefixNode { get; set; }
         
     }
     public class SampleViewModel

@@ -8,6 +8,7 @@ using static System.Text.Encoding;
 using static System.Net.WebRequestMethods;
 using static System.Net.Mime.MediaTypeNames;
 using System.Reflection;
+using System.Web;
 
 namespace PriceSpy.Web.Models
 {
@@ -224,7 +225,7 @@ namespace PriceSpy.Web.Models
                             Card card = new Card();
                             card.UrlPrefix = siteModel.Host;
                             string name = GetName(siteNode.NameNode, cardNode);
-                            string pictureAttribute = "href";
+                            //string pictureAttribute = "href";
                             card.Price = GetPrice(siteNode.PriceNode, cardNode);
                             card.Picture = GetPicture(siteNode.PictureNode, card.UrlPrefix, cardNode, siteNode.PictureAttribute);
                             card.CatNumber = SpliteBelagro(ref name);
@@ -263,10 +264,11 @@ namespace PriceSpy.Web.Models
             };
 
             ResponseContent responseContent = new();
+            string encodedSearch = HttpUtility.UrlEncode(search, Encoding.GetEncoding("windows-1251"));
 
             try
             {
-                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/price/?caption={search}&search=full", cancellationToken);
+                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/price/?caption={encodedSearch}&search=full", cancellationToken);
                 if (!httpResult.IsSuccessStatusCode) return siteModel;
                 else
                 {

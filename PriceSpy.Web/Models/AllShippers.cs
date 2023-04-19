@@ -2,10 +2,10 @@
 {
     public class Element
     {
-        public string Name { get; set; }  = "Default";
+        public string Name { get; set; } = "Default";
         public string CatNumber { get; set; } = "Default";
         public float? Price { get; set; } = 0;
-        
+
     }
     public class Shipper
     {
@@ -13,10 +13,9 @@
         public string PriceFile { get; set; }
         public bool IsRub { get; set; }
         public ICollection<Element> Elements { get; set; } = new List<Element>();
-        public ICollection<Element> SelectedElements { get; set; } = new List<Element>();
-        public int SelectedCount
+        public int ElementsCount
         {
-            get { return SelectedElements.Count; }
+            get { return Elements.Count; }
         }
         public Shipper(string path, string name)
         {

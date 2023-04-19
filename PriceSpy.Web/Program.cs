@@ -2,7 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.WebHost.UseUrls("http://+:5000");
+builder.WebHost.UseUrls("https://+:5001");
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.

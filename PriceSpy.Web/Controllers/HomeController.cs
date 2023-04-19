@@ -10,8 +10,8 @@ namespace PriceSpy.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly HtmlReader htmlReader;
-        private readonly XmlHandler xmlHandler;
-        
+        // private readonly XmlHandler xmlHandler;
+
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -31,13 +31,7 @@ namespace PriceSpy.Web.Controllers
             rate = rate.Replace(".", ",");
             if (!float.TryParse(rate, out float rateExchange)) rateExchange = 1;
             SampleViewModel.Rate = rateExchange;
-            XmlHandler.Read(sampleViewModel);
-
-            //var turbokResult = await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken)
-            //var magnitResult = await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken);
-            //var akvilonResult = await htmlReader.GetAkvilonResultAsync(searchQuery, cancellationToken);
-            //var belagroResult = await htmlReader.GetBelagroResult(searchQuery, cancellationToken);
-            //var mazrezervResult = await htmlReader.GetMazrezervResult(searchQuery, cancellationToken);
+            XmlHandler.Read(sampleViewModel, searchQuery);
 
             SampleViewModel.Rate = rateExchange;
             SampleViewModel.Search = searchQuery;
@@ -48,15 +42,13 @@ namespace PriceSpy.Web.Controllers
             sampleViewModel.Sites.Add(await htmlReader.GetBelagroResult(searchQuery, cancellationToken));
             sampleViewModel.Sites.Add(await htmlReader.GetMazrezervResult(searchQuery, cancellationToken));
 
-            XmlHandler.Search(sampleViewModel, searchQuery);
+            //XmlHandler.Search(sampleViewModel, searchQuery);
             return View("Results", sampleViewModel);
         }
 
         public IActionResult Privacy(string searchQuery)
         {
             SampleViewModel allShippers = new SampleViewModel();
-            XmlHandler.Read(allShippers);
-            XmlHandler.Search(allShippers, searchQuery);
             return View("Privacy", allShippers);
         }
 

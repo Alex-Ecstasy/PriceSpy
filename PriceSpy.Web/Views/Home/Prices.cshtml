@@ -1,0 +1,22 @@
+﻿@model SampleViewModel
+@{
+    ViewData["Title"] = "Страница для опытов";
+}
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="false" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel" slyle="width: 40%; visibility: visible;">
+        <div class="offcanvas-header">
+        <h6 class="offcanvas-title" data-bs-scroll="true" id="offcanvasDarkNavbarLabel">Результаты поиска по поставщикам</h6>
+            <button type="button" class="btn-close btn-close-black" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+            </ul>
+            <div class="d-flex mt-3" role="search">
+                <input id="search-box2" name="searchQuery" class="form-control" value="@SampleViewModel.Search" placeholder="Поиск по поставщикам @SampleViewModel.Search" type="text" style="padding: 5px">
+                <button id="search-button2" class="btn btn-outline-dark" type="submit">Search</button>
+                <input id="rate-box2" name="rate" class="form-control" value="@SampleViewModel.Rate" placeholder="@SampleViewModel.Rate" type="text" style="padding: 5px; width: 75px">
+            </div>
+            @await Html.PartialAsync("Fetch")
+        </div>
+    </div>
+

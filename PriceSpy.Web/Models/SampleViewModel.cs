@@ -49,10 +49,20 @@
     public class SampleViewModel
     {
 
-        public static string? Search { get; set;}
-        public static float Rate { get; set;}
+        public static string? Search { get; set; }
+        public static float Rate { get; set; }
         public static int TotalCount { get; set; }
         public ICollection<Shipper> Shippers { get; set; } = new List<Shipper>();
         public ICollection<Seller> Sites { get; set; } = new List<Seller>();
+        public SampleViewModel(string searchQuery, string rate)
+        {
+            Search = searchQuery;
+
+            if (!string.IsNullOrEmpty(rate)) rate = rate.Replace(".", ",");
+            if (!float.TryParse(rate, out float rateExchange) || rate == "0") 
+                rateExchange = DataFromLocalFiles.GetExchangeRates();
+
+            Rate = rateExchange;
+        }
     }
 }

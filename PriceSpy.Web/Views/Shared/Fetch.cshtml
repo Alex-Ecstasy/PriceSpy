@@ -1,0 +1,21 @@
+﻿@model SampleViewModel
+@{
+    ResponseContent responseContent = new();
+}
+            <div class="accordion" id="accordionPanelsStayOpenExample">
+                
+                 @try
+                {
+                    @foreach (var selectedShippers in Model.Shippers)
+                    {
+                        @await Html.PartialAsync("Accordion", selectedShippers)
+                    }
+                }
+                catch (Exception ex)
+                {
+                    responseContent.Message = ex.ToString();
+                    responseContent.isAvailable = false;
+                }
+
+            </div>
+

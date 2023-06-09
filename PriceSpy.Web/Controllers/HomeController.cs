@@ -21,20 +21,13 @@ namespace PriceSpy.Web.Controllers
 
         public async Task<IActionResult> Index(string searchQuery, string rate, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(searchQuery))
-            {
-                return View();
-            }
+            if (string.IsNullOrWhiteSpace(searchQuery)) return View();
+
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            SampleViewModel sampleViewModel = new SampleViewModel();
-            rate = rate.Replace(".", ",");
-            if (!float.TryParse(rate, out float rateExchange)) rateExchange = 1;
-            SampleViewModel.Rate = rateExchange;
-            XmlHandler.Read(sampleViewModel, searchQuery);
+            SampleViewModel sampleViewModel = new SampleViewModel(searchQuery, rate);
 
-            SampleViewModel.Rate = rateExchange;
-            SampleViewModel.Search = searchQuery;
+            XmlHandler.Read(sampleViewModel, searchQuery);
 
             sampleViewModel.Sites.Add(await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken));
             sampleViewModel.Sites.Add(await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken));
@@ -42,14 +35,24 @@ namespace PriceSpy.Web.Controllers
             sampleViewModel.Sites.Add(await htmlReader.GetBelagroResult(searchQuery, cancellationToken));
             sampleViewModel.Sites.Add(await htmlReader.GetMazrezervResult(searchQuery, cancellationToken));
 
-            //XmlHandler.Search(sampleViewModel, searchQuery);
             return View("Results", sampleViewModel);
         }
 
-        public IActionResult Privacy(string searchQuery)
+        public IActionResult Prices(string searchQuery, string rate)
         {
-            SampleViewModel allShippers = new SampleViewModel();
-            return View("Privacy", allShippers);
+            
+            SampleViewModel allShippers = new SampleViewModel(searchQuery, rate);
+            if (string.IsNullOrEmpty(searchQuery)) return View("Prices", allShippers);
+            XmlHandler.Read(allShippers, searchQuery);
+            return View("Prices", allShippers);
+        }
+
+        public IActionResult Fetch(string searchQuery, string rate)
+        {
+            if (string.IsNullOrEmpty(searchQuery)) return View("Prices");
+            SampleViewModel allShippers = new SampleViewModel(searchQuery, rate);
+            XmlHandler.Read(allShippers, searchQuery);
+            return PartialView("Fetch", allShippers);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

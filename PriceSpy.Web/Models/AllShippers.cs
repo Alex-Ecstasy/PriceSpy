@@ -12,6 +12,7 @@
         public string Name { get; private set; }
         public string PriceFile { get; set; }
         public bool IsRub { get; set; }
+        public static int IndexForAccordion { get; set; }
         public ICollection<Element> Elements { get; set; } = new List<Element>();
         public int ElementsCount
         {

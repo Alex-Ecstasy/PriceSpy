@@ -11,7 +11,7 @@ $(function () {
 
     button.onclick = function () {
         if (input.value) {
-            location.href = "/?searchQuery=" + input.value + "&Rate=" + rate.value;
+            location.href = "/Home/Results/?searchQuery=" + input.value + "&Rate=" + rate.value;
         }
     }
     input.addEventListener("keypress", function (event) {

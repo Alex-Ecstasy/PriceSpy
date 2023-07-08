@@ -1,17 +1,19 @@
 ﻿@model Element
-
+@{
+    string price = string.Format("{0:f2}", @Model.Price);
+}
 
 <div class="container"
      style="border: 1px;border-style: ridge;">
     <div class="row">
-        <div class="col-3" style="padding-left: 3px; padding-right: 3px;">
-            @Model.Name
-        </div>
-        <div class="col-md">            
+        <div class="col-3" style="padding-left: 3px; padding-right: 3px; word-wrap: break-word; /*word-break: break-all;*/">
             @Model.CatNumber
         </div>
-        <div class="col-xs" style="width: 10%;">
-            @Model.Price
+        <div class="col-md" style="padding-left: 0px; padding-right: 0px;">
+            @Model.Name
+        </div>
+        <div class="col-xs" style="width: 55px; text-align: end; padding: inherit;">
+            @price
         </div>
     </div>
 </div>

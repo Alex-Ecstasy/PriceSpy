@@ -6,12 +6,12 @@
 <div class="accordion-item">
     <h2 class="accordion-header" id="panelsStayOpen-headingOne">
         <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                data-bs-target="#panelsStayOpen-collapse@(i)" aria-expanded="true" style="padding-left: 12px;padding: 7px;"
+                data-bs-target="#panelsStayOpen-collapse@(Shipper.IndexForAccordion)" aria-expanded="true" style="padding-left: 12px;padding: 7px;"
                 aria-controls="panelsStayOpen-collapseOne">
             @Model.Name: @Model.ElementsCount
         </button>
     </h2>
-    <div id="panelsStayOpen-collapse@(i++)" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+    <div id="panelsStayOpen-collapse@(Shipper.IndexForAccordion++)" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
         @foreach (var item in Model.Elements)
         {
             @await Html.PartialAsync("Element", item)

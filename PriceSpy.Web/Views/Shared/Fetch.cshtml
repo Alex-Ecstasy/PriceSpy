@@ -3,19 +3,26 @@
     ResponseContent responseContent = new();
 }
             <div class="accordion" id="accordionPanelsStayOpenExample">
-                
-                 @try
+
+            @if (!string.IsNullOrEmpty(SampleViewModel.TextInfo))
+            {
+                <h6>@SampleViewModel.TextInfo</h6>
+            }
+            else
+            {
+                <p>Результатов в прайсах: @SampleViewModel.TotalCount</p>
+            }
+
+                @try
                 {
                     @foreach (var selectedShippers in Model.Shippers)
                     {
                         @await Html.PartialAsync("Accordion", selectedShippers)
                     }
                 }
-                catch (Exception ex)
-                {
-                    responseContent.Message = ex.ToString();
-                    responseContent.isAvailable = false;
-                }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
             </div>
 

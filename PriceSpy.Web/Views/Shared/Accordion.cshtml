@@ -1,6 +1,6 @@
 ﻿@model Shipper
 @{
-    int i = 0;
+    //int i = 0;
 }
 
 <div class="accordion-item">
@@ -8,11 +8,11 @@
         <button class="accordion-button" type="button" data-bs-toggle="collapse"
                 data-bs-target="#panelsStayOpen-collapse@(Shipper.IndexForAccordion)" aria-expanded="true" style="padding-left: 12px;padding: 7px;"
                 aria-controls="panelsStayOpen-collapseOne">
-            @Model.Name: @Model.ElementsCount
+            @Model.Name: @Model.SelectedElementsCount
         </button>
     </h2>
     <div id="panelsStayOpen-collapse@(Shipper.IndexForAccordion++)" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
-        @foreach (var item in Model.Elements)
+        @foreach (var item in Model.SelectedElements)
         {
             @await Html.PartialAsync("Element", item)
         }

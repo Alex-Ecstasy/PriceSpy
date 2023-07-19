@@ -1,12 +1,14 @@
 ﻿@model Card
-
+@{
+    string price = string.Format("{0:f2}", @Model.Price);
+}
 <div class="card" style="width: 280px;">
-    <img src="@Model.Picture" alt="" style="height:200px; object-fit:contain">
+    <img src="@Url.Content(Model.Picture)" alt="" style="height:200px; object-fit:contain">
     <div class="card-body">
         <h6 class="card-text">@Model.CatNumber</h6>
         @if (@Model.IsAvailable == true)
         {
-            <a class="btn btn-primary" href="@(Model.UrlPrefix)@(Model.CardUrl)">@(Model.Price) BYN</a>
+            <a class="btn btn-primary" href="@(Model.UrlPrefix)@(Model.CardUrl)">@(price) BYN</a>
             <h6 class="card-text">@Model.Status</h6>
         }
         else

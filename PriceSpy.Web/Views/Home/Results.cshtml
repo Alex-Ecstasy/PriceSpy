@@ -8,7 +8,7 @@
 <h1> " "</h1>
 <ul class="list-group">
     <li>
-        @foreach (var site in @Model.Sites)
+        @foreach (var site in SampleViewModel.Sites)
         {
             <h4>@site.Name: @site.ResultCount 
                 @if (!site.IsAvailable)

@@ -12,17 +12,18 @@
             {
                 <p>Результатов в прайсах: @SampleViewModel.TotalCount</p>
             }
-
+@*
                 @try
-                {
-                    @foreach (var selectedShippers in Model.Shippers)
+                {*@
+                    @if (SampleViewModel.Shippers.Count != 0)
+                    @foreach (var selectedShippers in SampleViewModel.Shippers)
                     {
                         @await Html.PartialAsync("Accordion", selectedShippers)
                     }
-                }
+@*                }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            }
+            }*@
             </div>
 

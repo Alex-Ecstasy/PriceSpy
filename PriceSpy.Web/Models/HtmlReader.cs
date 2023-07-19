@@ -1,13 +1,6 @@
 ﻿using HtmlAgilityPack;
-using System;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Xml.Linq;
-using static System.Text.Encoding;
-using static System.Net.WebRequestMethods;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection;
 using System.Web;
 
 namespace PriceSpy.Web.Models
@@ -335,10 +328,10 @@ namespace PriceSpy.Web.Models
         }
         private static string GetPicture(string pictureNode, string prefixNode, HtmlNode cardNode, string pictureAttribute)
         {
-            string? cardPicture = "SadClient.jpg";
-            if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "SadClient.jpg";
+            string? cardPicture = "~/SadClient.jpg";
+            if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "~/SadClient.jpg";
             cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == pictureAttribute)?.Value;
-            if (cardPicture == "https://turbok.by/img/no-photo--lg.png") return cardPicture = "SadClient.jpg";
+            if (cardPicture == "https://turbok.by/img/no-photo--lg.png") return cardPicture = "~/SadClient.jpg";
             if (prefixNode == "https://turbok.by" || prefixNode == "https://minskmagnit.by") return cardPicture;
             if (!String.IsNullOrEmpty(cardPicture))
             {
@@ -346,7 +339,7 @@ namespace PriceSpy.Web.Models
             }
             else
             {
-                cardPicture = "SadClient.jpg";
+                cardPicture = "~/SadClient.jpg";
             }
             return cardPicture;
         }

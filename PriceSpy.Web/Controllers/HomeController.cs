@@ -17,18 +17,16 @@ namespace PriceSpy.Web.Controllers
             htmlReader = new HtmlReader();
         }
 
-        public IActionResult Index()
+        public async Task <IActionResult> Index()
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            SampleViewModel.Rate = DataFromLocalFiles.GetExchangeRates();
-            XmlHandler.Load();
+            await RateHandler.GetRateFromFileAsync();
             return View("Index");
         }
 
         public async Task<IActionResult> Results(string searchQuery, string rate, CancellationToken cancellationToken)
         {
-            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            SampleViewModel.Rate = SampleViewModel.GetRate(rate);
+            await RateHandler.CheckRateAsync(rate);
             if (string.IsNullOrWhiteSpace(searchQuery)) return View();
             SampleViewModel.Search = searchQuery;
             XmlHandler.Search(searchQuery);
@@ -42,24 +40,33 @@ namespace PriceSpy.Web.Controllers
             return View("Results");
         }
 
-        public IActionResult Prices(string searchQuery, string rate)
+        public async Task<IActionResult> PricesAsync(string searchQuery, string rate)
         {
-            SampleViewModel.Rate = SampleViewModel.GetRate(rate);
+            
+            await RateHandler.CheckRateAsync(rate);
             if (string.IsNullOrEmpty(searchQuery)) return View("Prices");
             XmlHandler.Search(searchQuery);
             return View("Prices");
         }
 
-        public IActionResult Fetch(string searchQuery, string rate)
+        public async Task<IActionResult> FetchAsync(string searchQuery, string rate)
         {
-            SampleViewModel.Rate = SampleViewModel.GetRate(rate);
+            if (string.IsNullOrEmpty(rate))
+            {
+                SampleViewModel.TextInfo = "Rate is empty";
+                return PartialView("Fetch");
+            }
+            await RateHandler.CheckRateAsync(rate);
+
             if (string.IsNullOrEmpty(searchQuery))
             {
                 SampleViewModel.TextInfo = "Search query is empty";
                 return PartialView("Fetch");
             }
             SampleViewModel.TextInfo = null;
+            if (SampleViewModel.Shippers.Count == 0) XmlHandler.Load();
             XmlHandler.Search(searchQuery);
+            /// if GetRateFromBank() rate not change in form
             return PartialView("Fetch");
         }
 

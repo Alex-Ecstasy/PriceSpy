@@ -44,6 +44,7 @@ namespace PriceSpy.Web.Models
         public static void Search(string searchQuery)
         {
             SampleViewModel.TotalCount = 0;
+            if (SampleViewModel.Shippers.Count == 0) Load();
             foreach (var shipper in SampleViewModel.Shippers)
             {
                 shipper.SelectedElements.Clear();

@@ -54,12 +54,6 @@
         public static string? TextInfo { get; set; }
         public static ICollection<Shipper> Shippers { get; set; } = new List<Shipper>();
         public static ICollection<Seller> Sites { get; set; } = new List<Seller>();
-        public static float GetRate(string rate)
-        {
-            if (!string.IsNullOrEmpty(rate)) rate = rate.Replace(".", ",");
-            if (!float.TryParse(rate, out float rateExchange) || rate == "0")
-                rateExchange = DataFromLocalFiles.GetExchangeRates();
-            return rateExchange;
-        }
+
     }
 }

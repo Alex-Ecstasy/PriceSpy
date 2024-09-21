@@ -2,28 +2,22 @@
 @{
     ResponseContent responseContent = new();
 }
-            <div class="accordion" id="accordionPanelsStayOpenExample">
+<div class="accordion" id="accordionPanelsStayOpenExample">
 
-            @if (!string.IsNullOrEmpty(SampleViewModel.TextInfo))
-            {
-                <h6>@SampleViewModel.TextInfo</h6>
-            }
-            else
-            {
-                <p>Результатов в прайсах: @SampleViewModel.TotalCount</p>
-            }
-@*
-                @try
-                {*@
-                    @if (SampleViewModel.Shippers.Count != 0)
-                    @foreach (var selectedShippers in SampleViewModel.Shippers)
-                    {
-                        @await Html.PartialAsync("Accordion", selectedShippers)
-                    }
-@*                }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }*@
-            </div>
+    @if (!string.IsNullOrEmpty(SampleViewModel.TextInfo))
+    {
+        <h6>@SampleViewModel.TextInfo</h6>
+    }
+    else
+    {
+        <p>Результатов в прайсах: @SampleViewModel.TotalCount</p>
+    }
+
+    @if (SampleViewModel.Shippers.Count != 0)
+    @foreach (var selectedShippers in SampleViewModel.Shippers)
+    {
+        @await Html.PartialAsync("Accordion", selectedShippers)
+    }
+
+</div>
 

@@ -1,6 +1,13 @@
 ﻿using HtmlAgilityPack;
+//using System;
 using System.Globalization;
+//using System.Linq;
 using System.Text;
+//using System.Xml.Linq;
+using static System.Text.Encoding;
+//using static System.Net.WebRequestMethods;
+//using static System.Net.Mime.MediaTypeNames;
+//using System.Reflection;
 using System.Web;
 
 namespace PriceSpy.Web.Models
@@ -72,7 +79,7 @@ namespace PriceSpy.Web.Models
         }
         public async Task<Seller> GetMagnitResultAsync(string search, CancellationToken cancellationToken)
         {
-            var siteModel = new Seller("Minskmagnit", "https://minskmagnit.by");
+            var siteModel = new Seller("Minskmagnit", "https://minskmagnit.by/");
             var siteNode = new SellerNodes
             {
                 NameNode = "div/div[2]/div[1]/div",
@@ -136,11 +143,11 @@ namespace PriceSpy.Web.Models
             {
                 NameNode = "div/div[1]/div[2]/div[1]",
                 PriceNode = "div/div[1]/div[3]/div/span/span[2]",
-                PictureNode = "div/div[1]/div[1]/div[1]/a/img",
+                PictureNode = "div/div[1]/div[1]/div[1]/img",
                 PictureAttribute = "data-src",
                 CatNumberNode = "",
                 StatusNode = "div/div[2]/div[1]/div[1]/div/div/span/span",
-                CardUrlNode = "div/div[1]/div[1]/div[1]/a"
+                CardUrlNode = "div/div[1]/div[2]/div[1]/a"
             };
 
             ResponseContent responseContent = new();
@@ -257,8 +264,9 @@ namespace PriceSpy.Web.Models
             };
 
             ResponseContent responseContent = new();
-            string encodedSearch = HttpUtility.UrlEncode(search, Encoding.GetEncoding("windows-1251"));
 
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            string encodedSearch = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
             try
             {
                 var httpResult = await httpClient.GetAsync($"{siteModel.Host}/price/?caption={encodedSearch}&search=full", cancellationToken);
@@ -272,9 +280,10 @@ namespace PriceSpy.Web.Models
                     HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"print\"]/table/tr");
                     if (nodes != null)
                     {
-                        
                         foreach (var cardNode in nodes.Skip(2))
                         {
+                            if (cardNode.SelectSingleNode("td").ParentNode.OuterHtml.Contains("class='price_line'"))
+                            {
                             Card card = new Card();
                             card.UrlPrefix = siteModel.Host;
                             card.Name = GetName(siteNode.NameNode, cardNode);
@@ -283,7 +292,7 @@ namespace PriceSpy.Web.Models
                             card.CatNumber = GetCatNumber(siteNode.CatNumberNode, cardNode);
                             card.Status = GetStatus(siteNode.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
-                            if (card.Status == "0")
+                            if (card.Status == "0" || card.Status == "Неизвестный статус")
                             {
                                 card.IsAvailable = false;
                                 card.Status = "Нет в наличии";
@@ -296,6 +305,8 @@ namespace PriceSpy.Web.Models
 
                             card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
+                            }
+
                         }
                         siteModel.CardList = siteModel.CardList.OrderByDescending(x => x.IsAvailable).ToList();
                     }
@@ -321,7 +332,7 @@ namespace PriceSpy.Web.Models
         {
             float cardPrice = 0;
             if (cardNode.SelectSingleNode(priceNode) == null) return cardPrice = 0;
-            var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim().Replace("&nbsp;", "").Replace("р.", "").Replace("руб.", "").Replace("/комплект", "").Replace(".", ",");
+            var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim().Replace("&nbsp;", "").Replace("р.", "").Replace("руб.", "").Replace("/комплект", "").Replace(".", ",").Replace("от", "");
             bool isRightPrice = float.TryParse(priceText, NumberStyles.Any, CultureInfo.CurrentCulture, out float price);
             if (isRightPrice) cardPrice = price;
             return cardPrice;
@@ -332,7 +343,7 @@ namespace PriceSpy.Web.Models
             if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "~/SadClient.jpg";
             cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == pictureAttribute)?.Value;
             if (cardPicture == "https://turbok.by/img/no-photo--lg.png") return cardPicture = "~/SadClient.jpg";
-            if (prefixNode == "https://turbok.by" || prefixNode == "https://minskmagnit.by") return cardPicture;
+            if (prefixNode == "https://turbok.by" || prefixNode == "https://minskmagnit.by/") return cardPicture;
             if (!String.IsNullOrEmpty(cardPicture))
             {
                 cardPicture = string.Concat(prefixNode, cardPicture);

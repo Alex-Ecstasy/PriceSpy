@@ -3,15 +3,24 @@
 }
 <div class="container-fluid" style="padding-top: 60px;">
     <main role="main">
-        <h5>Здесь мы будем смотреть цены на запчасти у конкурентов:</h5>
+        <h5>Здесь мы будем смотреть цены на запчасти:</h5>
         <ul>
             <li><a href="https://turbok.by">Турбокомпрессор</a></li>
             <li><a href="https://minskmagnit.by">ЗапчастьМагнит</a></li>
             <li><a href="https://akvilonavto.by">Аквилон</a></li>
             <li><a href="https://1belagro.by">Белагро</a></li>
+            <li><a href="https://www.mazrezerv.ru/">МАЗрезерв</a></li>
         </ul>
         <h5>Кнопка меню открывает поиск запчастей у поставщиков</h5>
+        <h6>Прайсы в формате XML, должны лежать в папке "Документы/Prices"</h6>
+        <h6>Загружены прайсы:</h6>
+        <ul>
+            @foreach (var shipper in SampleViewModel.Shippers)
+            {
+                <li>@shipper.Name@if (shipper.Error) {<a> Ошибка чтения файла</a>} </li>
+            }
+        </ul>
 
-
+        <h6>Курс RUB-BYN cправа от кнопки поиска. Отправка пустой формы вызовет запрос официального курса НБРБ</h6>
     </main>
 </div>

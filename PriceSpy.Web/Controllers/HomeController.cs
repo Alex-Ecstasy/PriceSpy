@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PriceSpy.Web.Models;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 
 namespace PriceSpy.Web.Controllers
@@ -19,15 +20,16 @@ namespace PriceSpy.Web.Controllers
 
         public async Task <IActionResult> Index()
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             await RateHandler.GetRateFromFileAsync();
+            /// Deserialize SiteNodes(XPath) from file.json for every seller -> if file.json any error - write json from code
+            XmlHandler.Load();
             return View("Index");
         }
 
         public async Task<IActionResult> Results(string searchQuery, string rate, CancellationToken cancellationToken)
         {
-            await RateHandler.CheckRateAsync(rate);
             if (string.IsNullOrWhiteSpace(searchQuery)) return View();
+            await RateHandler.CheckRateAsync(rate);
             SampleViewModel.Search = searchQuery;
             XmlHandler.Search(searchQuery);
             SampleViewModel.Sites.Clear();

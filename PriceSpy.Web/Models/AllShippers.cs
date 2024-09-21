@@ -9,9 +9,11 @@
     }
     public class Shipper
     {
-        public string Name { get; private set; }
+        public string Name { get; set; }
         public string PriceFile { get; set; }
         public bool IsRub { get; set; }
+        public bool NotContainsTaxes { get; set; }
+        public bool Error { get; set; }
         public static int IndexForAccordion { get; set; }
         public ICollection<Element> AllElements { get; set; } = new List<Element>();
         public ICollection<Element> SelectedElements { get; set; } = new List<Element>();

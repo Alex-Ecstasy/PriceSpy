@@ -4,13 +4,20 @@
 }
 
 <div class="accordion-item">
-    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+    <div class="accordion-header" id="panelsStayOpen-headingOne">
         <button class="accordion-button" type="button" data-bs-toggle="collapse"
                 data-bs-target="#panelsStayOpen-collapse@(Shipper.IndexForAccordion)" aria-expanded="true" style="padding-left: 12px;padding: 7px;"
                 aria-controls="panelsStayOpen-collapseOne">
-            @Model.Name: @Model.SelectedElementsCount
+                @if (!Model.IsRub)
+                {
+                    <div style="color :orangered">@Model.Name: @Model.SelectedElementsCount</div>
+                }
+                else
+                {
+                    <div>@Model.Name: @Model.SelectedElementsCount</div>
+                }
         </button>
-    </h2>
+    </div>
     <div id="panelsStayOpen-collapse@(Shipper.IndexForAccordion++)" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
         @foreach (var item in Model.SelectedElements)
         {

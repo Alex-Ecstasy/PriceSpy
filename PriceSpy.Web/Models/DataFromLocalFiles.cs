@@ -21,5 +21,16 @@ namespace PriceSpy.Web.Models
             else return 1;
             
         }
+        public static Shipper PriceNameHandler (Shipper shipper, string priceName)
+        {
+            if (priceName.Length > 4) priceName = priceName.Substring(0, priceName.Length - 4);
+            if (priceName.Contains("ÐÔ", StringComparison.OrdinalIgnoreCase)) shipper.IsRub = true;
+            if (priceName.Contains("Áåç ÍÄÑ", StringComparison.OrdinalIgnoreCase)) shipper.NotContainsTaxes = true;
+            priceName = priceName.Replace("ÐÁ", "", StringComparison.OrdinalIgnoreCase);
+            priceName = priceName.Replace("ÐÔ", "", StringComparison.OrdinalIgnoreCase);
+            priceName = priceName.Replace("(Áåç ÍÄÑ)", "", StringComparison.OrdinalIgnoreCase);
+            shipper.Name = priceName;
+            return shipper;
+        }
     }
 }

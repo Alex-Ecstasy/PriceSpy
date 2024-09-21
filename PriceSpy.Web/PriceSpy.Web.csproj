@@ -18,12 +18,33 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\Home\**" />
+    <Content Remove="wwwroot\Home\**" />
+    <EmbeddedResource Remove="wwwroot\Home\**" />
+    <None Remove="wwwroot\Home\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Views\Shared\DisplayTemplates\" />
-    <Folder Include="wwwroot\Home\Results\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

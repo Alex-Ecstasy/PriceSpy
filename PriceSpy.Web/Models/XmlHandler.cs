@@ -7,7 +7,8 @@ namespace PriceSpy.Web.Models
     {
         public static void Load()
         {
-            string pathWithPrices = (AppDomain.CurrentDomain.BaseDirectory + "Prices");
+
+            string pathWithPrices = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Prices");
             DirectoryInfo fileList = new DirectoryInfo(pathWithPrices);
             SampleViewModel.Shippers.Clear();
             if (fileList.Exists)
@@ -17,29 +18,50 @@ namespace PriceSpy.Web.Models
 
                 foreach (FileInfo file in fileList.GetFiles("*.xml"))
                 {
-                    Shipper shipper = new Shipper(file.FullName, file.Name.Substring(0, file.Name.Length - 6));
-                    if (file.Name.Contains("РФ")) shipper.IsRub = true;
+                    string priceName = file.Name;
+                    Shipper shipper = new Shipper(file.FullName, priceName);
+                    DataFromLocalFiles.PriceNameHandler(shipper, priceName);
 
-                    XmlDocument xdoc = new XmlDocument();
-                    xdoc.Load(shipper.PriceFile);
-                    XmlNodeList rowList = xdoc.GetElementsByTagName("Row");
-                    foreach (var docelement in rowList)
+
+                    try
                     {
-                        Element element = new();
-                        element.Name = (docelement as XmlElement)?.ChildNodes[0]?.InnerText.Trim() ?? string.Empty;
-                        element.CatNumber = (docelement as XmlElement)?.ChildNodes[1]?.InnerText.Trim() ?? string.Empty;
-                        float price = 0;
-                        float.TryParse((docelement as XmlElement)?.ChildNodes[2]?.InnerText.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out price);
-                        //if (shipper.IsRub) price *= SampleViewModel.Rate;
-                        element.Price = price;
-                        shipper.AllElements.Add(element);
+                        float taxes = 1.2f;
+                        XmlDocument xdoc = new XmlDocument();
+                        xdoc.Load(shipper.PriceFile);
+                        XmlNodeList rowList = xdoc.GetElementsByTagName("Row");
+
+                        foreach (var docelement in rowList)
+                        {
+                            Element element = new();
+                            element.Name = (docelement as XmlElement)?.ChildNodes[0]?.InnerText.Trim() ?? string.Empty;
+                            element.CatNumber = (docelement as XmlElement)?.ChildNodes[1]?.InnerText.Trim() ?? string.Empty;
+                            float price = 0;
+                            float.TryParse((docelement as XmlElement)?.ChildNodes[2]?.InnerText.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out price);
+                            if (shipper.NotContainsTaxes) price *= taxes;
+                            element.Price = price;
+                            shipper.AllElements.Add(element);
+                        }
+
                     }
-                    Console.WriteLine("File loaded " + shipper.Name);
-                    SampleViewModel.Shippers.Add(shipper);
+                    catch 
+                    {
+                        shipper.Error = true;
+                    }
+                    finally
+                    {
+                        
+                        SampleViewModel.Shippers.Add(shipper);
+                        string loadStatus = "Loaded";
+                        if (shipper.Error)
+                            loadStatus = "Read error";
+                        Console.WriteLine(shipper.Name + " " + loadStatus);
+                        
+                    }
 
                 }
+                SampleViewModel.Shippers = SampleViewModel.Shippers.OrderByDescending(x => x.IsRub).ToList();
             }
-            else SampleViewModel.TextInfo = "Dirrectory /Prices not found";
+            else SampleViewModel.TextInfo = "Directory /Prices not found";
         }
         public static void Search(string searchQuery)
         {

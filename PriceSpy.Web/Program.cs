@@ -2,7 +2,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.WebHost.UseUrls("https://+:5001");
+
+
+//builder.WebHost.UseUrls("https://+:5001");
 
 var app = builder.Build();
 // Configure the HTTP request pipeline.
@@ -12,7 +14,14 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
+if (app.Environment.IsDevelopment())
+{
+    builder.WebHost.UseUrls("https://+:7152");
+}
+else
+{
+    builder.WebHost.UseUrls("https://+:5001");
+}
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

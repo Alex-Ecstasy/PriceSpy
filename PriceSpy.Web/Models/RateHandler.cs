@@ -5,14 +5,15 @@ using System.Threading;
 using System.Text.Json;
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.VisualBasic;
 
 namespace PriceSpy.Web.Models
 {
     public static class RateHandler
     {
-        private static string pathWithPrices = (AppDomain.CurrentDomain.BaseDirectory);
-        private static string File = "/Currency.txt";
-        private static string pathExchangeRates = pathWithPrices + File;
+        private static string _rateFile = "Rate.txt";
+        private static string _pathRateFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), _rateFile);
+        
         public static async Task CheckRateAsync(string rate)
         {
             if (!string.IsNullOrEmpty(rate)) rate = rate.Replace(".", ",");
@@ -29,10 +30,10 @@ namespace PriceSpy.Web.Models
         }
         public static async Task GetRateFromFileAsync()
         {
-            FileInfo fileInf = new FileInfo(pathExchangeRates);
+            FileInfo fileInf = new FileInfo(_pathRateFile);
             if (fileInf.Exists)
             {
-                StreamReader streamReader = new StreamReader(pathExchangeRates);
+                StreamReader streamReader = new StreamReader(_pathRateFile);
 
                 string? rate = streamReader.ReadLine();
                 streamReader.Close();
@@ -81,10 +82,19 @@ namespace PriceSpy.Web.Models
         }
         public static void WriteRateInFile()
         {
-            using (StreamWriter writer = new StreamWriter(pathExchangeRates))
+            try
             {
-                writer.Write(SampleViewModel.Rate);
+                using (StreamWriter writer = new StreamWriter(_pathRateFile))
+                {
+                    writer.Write(SampleViewModel.Rate);
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Console.WriteLine("Не удается записать файл ", _pathRateFile);
+            }
+
         }
     }
     public class RateShort

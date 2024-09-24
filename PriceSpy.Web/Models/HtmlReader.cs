@@ -10,6 +10,7 @@ using static System.Text.Encoding;
 //using System.Reflection;
 using System.Web;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace PriceSpy.Web.Models
 {
@@ -24,6 +25,7 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetTurbokResultsAsync(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller ("Turbok", "https://turbok.by");
+            siteModel.SearchUrl = $"{siteModel.Host}/search?gender=&gender=&catlist=0&searchText={search}";
             var siteNode = new SellerNodes
             {
                 NameNode = "div[2]/div[1]/div[1]",
@@ -39,7 +41,7 @@ namespace PriceSpy.Web.Models
             try
             {
                 
-                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/search?gender=&gender=&catlist=0&searchText={search}", cancellationToken);
+                var httpResult = await httpClient.GetAsync(siteModel.SearchUrl, cancellationToken);
                 
                 if (!httpResult.IsSuccessStatusCode) return siteModel;
                 else
@@ -81,6 +83,7 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetMagnitResultAsync(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller("Minskmagnit", "https://minskmagnit.by/");
+            siteModel.SearchUrl = $"{siteModel.Host}/site_search?search_term={search}";
             var siteNode = new SellerNodes
             {
                 NameNode = "div/div[2]/div[1]/div",
@@ -96,7 +99,7 @@ namespace PriceSpy.Web.Models
 
             try
             {
-                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/site_search?search_term={search}", cancellationToken);
+                var httpResult = await httpClient.GetAsync(siteModel.SearchUrl, cancellationToken);
 
                 if (!httpResult.IsSuccessStatusCode) return siteModel;
                 else
@@ -140,6 +143,7 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetAkvilonResultAsync(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller("Akvilon", "https://akvilonavto.by");
+            siteModel.SearchUrl = $"{siteModel.Host}/catalog/?q={search}";
             var siteNode = new SellerNodes
             {
                 NameNode = "div/div[1]/div[2]/div[1]",
@@ -154,7 +158,7 @@ namespace PriceSpy.Web.Models
             ResponseContent responseContent = new();
             try
             {
-                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/catalog/?q={search}", cancellationToken);
+                var httpResult = await httpClient.GetAsync(siteModel.SearchUrl, cancellationToken);
                 
                 if (!httpResult.IsSuccessStatusCode) return siteModel;
                 else
@@ -163,12 +167,15 @@ namespace PriceSpy.Web.Models
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(htmlResult);
                     siteModel.IsAvailable = true;
-                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//*[@id=\"view-showcase\"]/div");
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes("//div[@data-productid]");
                     if (nodes != null)
                     {
-                        foreach (var cardNode in nodes)
+                        foreach (var productNode in nodes.Take(9))
                         {
                             Card card = new Card();
+                            string id = productNode.GetAttributeValue("id", "");
+                            string prodId = $"//*[@id=\"{id}\"]";
+                            var cardNode = doc.DocumentNode.SelectSingleNode(prodId).ParentNode;
                             card.UrlPrefix = siteModel.Host;
                             string name = GetName(siteNode.NameNode, cardNode);
                             card.Price = GetPrice(siteNode.PriceNode, cardNode);
@@ -196,6 +203,7 @@ namespace PriceSpy.Web.Models
         public async Task<Seller> GetBelagroResult(string search, CancellationToken cancellationToken)
         {
             var siteModel = new Seller("Belagro", "https://1belagro.by");
+            siteModel.SearchUrl = $"{siteModel.Host}/search/?q={search}";
             var siteNode = new SellerNodes
             {
                 NameNode = "div/a",
@@ -210,7 +218,7 @@ namespace PriceSpy.Web.Models
             ResponseContent responseContent = new();
             try
             {
-                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/search/?q={search}", cancellationToken);
+                var httpResult = await httpClient.GetAsync(siteModel.SearchUrl, cancellationToken);
                 if (!httpResult.IsSuccessStatusCode) return siteModel;
                 else
                 {
@@ -267,9 +275,10 @@ namespace PriceSpy.Web.Models
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             string encodedSearch = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
+            siteModel.SearchUrl = $"{siteModel.Host}/price/?caption={encodedSearch}&search=full";
             try
             {
-                var httpResult = await httpClient.GetAsync($"{siteModel.Host}/price/?caption={encodedSearch}&search=full", cancellationToken);
+                var httpResult = await httpClient.GetAsync(siteModel.SearchUrl, cancellationToken);
                 if (!httpResult.IsSuccessStatusCode) return siteModel;
                 else
                 {
@@ -342,6 +351,7 @@ namespace PriceSpy.Web.Models
             string? cardPicture = "~/SadClient.jpg";
             if (cardNode.SelectSingleNode(pictureNode) == null) return cardPicture = "~/SadClient.jpg";
             cardPicture = cardNode.SelectSingleNode(pictureNode)?.Attributes.FirstOrDefault(x => x.Name == pictureAttribute)?.Value;
+            if (String.IsNullOrEmpty(cardPicture)) return cardPicture = "~/SadClient.jpg";
             if (cardPicture == "https://turbok.by/img/no-photo--lg.png" || cardPicture.Contains("catalog/catalog-photo-3.svg")) return cardPicture = "~/SadClient.jpg";
             if (prefixNode == "https://turbok.by" || prefixNode == "https://minskmagnit.by/") return cardPicture;
             if (prefixNode == "https://1belagro.by") cardPicture = GetFullPictureBelagro(cardPicture);
@@ -397,23 +407,37 @@ namespace PriceSpy.Web.Models
         {
             int charIndexForTrim = 0;
             int numberOfParentheses = 0;
-            for (int i = cardName.Length - 1; i >= 0; i--)
+            string cardNumber = "-----";
+            if (cardName.Length > 100)
             {
-                if (cardName[i] == ')')
-                {
-                    numberOfParentheses++;
-                }
-                if (cardName[i] == '(')
-                    numberOfParentheses--;
-                if (numberOfParentheses == 0)
-                {
-                    charIndexForTrim = i;
-                    break;
-                }
+                cardName = cardName.Substring(cardName.IndexOf('%') + 1).Trim();
+                cardName = cardName.Substring(0, cardName.IndexOf("\n")).Trim();
             }
-            var cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd().Replace("&quot", "");
-            if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
-            cardName = cardName.Substring(0, charIndexForTrim).Trim().Replace("&quot", "");
+            for (int i = cardName.Length - 1; i >= 0; i--)
+                {
+                    if (cardName[i] == ')')
+                    {
+                        numberOfParentheses++;
+                    }
+                    if (cardName[i] == '(')
+                        numberOfParentheses--;
+                    if (numberOfParentheses == 0)
+                    {
+                        charIndexForTrim = i;
+                        break;
+                    }
+                }
+                if (charIndexForTrim+1 < cardName.Length)
+            {
+                cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd().Replace("&quot", "");
+                if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
+                cardName = cardName.Substring(0, charIndexForTrim).Trim().Replace("&quot", "");
+            }
+                else
+            {
+                cardName = "-----";
+            }
+
             return cardNumber;
         }
         private static string GetFullPictureBelagro(string url)

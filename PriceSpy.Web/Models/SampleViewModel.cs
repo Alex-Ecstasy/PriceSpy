@@ -17,7 +17,8 @@
         public string Name { get; set; }
         public bool IsAvailable { get; set; }
         public string Host { get; set; }
-       
+        public string SearchUrl { get; set; }
+
         public ICollection<Card> CardList { get; set; } = new List<Card>();
 
         public int ResultCount
@@ -43,7 +44,6 @@
         public string? CatNumberNode { get; set; }
         public string? StatusNode { get; set; }
         public string? CardUrlNode { get; set; }
-        public string? UrlPrefixNode { get; set; }
         
     }
     public class SampleViewModel

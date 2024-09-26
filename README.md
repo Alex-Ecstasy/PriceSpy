@@ -34,11 +34,12 @@ When parsing, various kinds of artifacts often appear in the lines, they also ha
 
 ## What will be changed:
 - Combine classes of site product cards and product cards from price lists
-- Add sorting of results in ascending order of prices
 - Change the layout of the cards so that more information fits on one page without scrolling
-- Prices from the price list results will be multiplied by the exchange rate
-- Think about how to separate prices by currency: BYN and RUB
+
 
 ### What has already been done
 - Add search by supplier prices (local only)
 - Improve code readability by adding a single parsing method for all sites
+- Prices from the price list results will be multiplied by the exchange rate
+- Think about how to separate prices by currency: BYN and RUB  
+- Add sorting of results in ascending order of prices

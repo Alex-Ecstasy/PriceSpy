@@ -16,8 +16,8 @@
     {
         public string Name { get; set; }
         public bool IsAvailable { get; set; }
-        public string Host { get; set; }
-        public string SearchUrl { get; set; }
+        public string? Host { get; set; }
+        public string? SearchUrl { get; set; }
 
         public ICollection<Card> CardList { get; set; } = new List<Card>();
 
@@ -28,15 +28,20 @@
                 return CardList.Count;
             }
         }
-        public Seller(string name, string host)
+        public Seller(string name/*, string host*/)
         {
             Name = name;
-            Host = host;
+            //Host = host;
         }
     }
 
-    public class SellerNodes
+    public class SellersNodes
     {
+        public SellersNodes() { }
+        public string? SiteName { get; set; }
+        public string? SiteHost { get; set; }
+        public string? SearchUrl { get; set; }
+        public string? SearchResultsNode { get; set; }
         public string? NameNode { get; set; }
         public string? PriceNode { get; set; }
         public string? PictureNode { get; set; }
@@ -44,7 +49,11 @@
         public string? CatNumberNode { get; set; }
         public string? StatusNode { get; set; }
         public string? CardUrlNode { get; set; }
-        
+        public SellersNodes(string name, string host)
+        {
+            SiteName = name;
+            SiteHost = host;
+        }
     }
     public class SampleViewModel
     {
@@ -54,6 +63,7 @@
         public static string? TextInfo { get; set; }
         public static ICollection<Shipper> Shippers { get; set; } = new List<Shipper>();
         public static ICollection<Seller> Sites { get; set; } = new List<Seller>();
+        public static ICollection<SellersNodes> Sellers { get; set; } = new List<SellersNodes>();
 
     }
 }

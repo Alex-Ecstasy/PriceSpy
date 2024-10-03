@@ -22,21 +22,9 @@ namespace PriceSpy.Web.Models
             this.httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
-        public async Task<Seller> GetTurbokResultsAsync(string search, CancellationToken cancellationToken)
-        {
-            var siteModel = new Seller ("Turbok", "https://turbok.by");
-            siteModel.SearchUrl = $"{siteModel.Host}/search?gender=&gender=&catlist=0&searchText={search}";
-            var siteNode = new SellerNodes
-            {
-                NameNode = "div[2]/div[1]/div[1]",
-                PriceNode = "div[2]/div[2]/div",
-                PictureNode = "div[1]/a/div/img",
-                PictureAttribute = "src",
-                CatNumberNode = "div[2]/div[1]/div[2]/p[1]",
-                StatusNode = "div[2]/div[1]/p",
-                CardUrlNode = "div[1]/a"
-            };
 
+        /* public async Task<Seller> GetTurbokResultsAsync(string search, CancellationToken cancellationToken)
+        {
             ResponseContent responseContent = new();
             try
             {
@@ -82,19 +70,6 @@ namespace PriceSpy.Web.Models
         }
         public async Task<Seller> GetMagnitResultAsync(string search, CancellationToken cancellationToken)
         {
-            var siteModel = new Seller("Minskmagnit", "https://minskmagnit.by/");
-            siteModel.SearchUrl = $"{siteModel.Host}/site_search?search_term={search}";
-            var siteNode = new SellerNodes
-            {
-                NameNode = "div/div[2]/div[1]/div",
-                PriceNode = "div/div[2]/div[2]/div",
-                PictureNode = "div/div[1]/a/img",
-                PictureAttribute = "src",
-                CatNumberNode = "div/div[2]/div[1]/span",
-                StatusNode = "div/div[2]/div[2]/div[2]/span[1]",
-                CardUrlNode = "div/div[1]/a"
-            };
-
             ResponseContent responseContent = new();
 
             try
@@ -139,22 +114,9 @@ namespace PriceSpy.Web.Models
 
 
             return siteModel;
-        }
-        public async Task<Seller> GetAkvilonResultAsync(string search, CancellationToken cancellationToken)
+        }*/
+        /*public async Task<Seller> GetAkvilonResultAsync(string search, CancellationToken cancellationToken)
         {
-            var siteModel = new Seller("Akvilon", "https://akvilonavto.by");
-            siteModel.SearchUrl = $"{siteModel.Host}/catalog/?q={search}";
-            var siteNode = new SellerNodes
-            {
-                NameNode = "div/div[1]/div[2]/div[1]",
-                PriceNode = "div/div[1]/div[3]/div/span/span[2]",
-                PictureNode = "div/div[1]/div[1]/div[1]/img",
-                PictureAttribute = "data-src",
-                CatNumberNode = "",
-                StatusNode = "div/div[2]/div[1]/div[1]/div/div/span/span",
-                CardUrlNode = "div/div[1]/div[2]/div[1]/a"
-            };
-
             ResponseContent responseContent = new();
             try
             {
@@ -199,22 +161,9 @@ namespace PriceSpy.Web.Models
             }
 
             return siteModel;
-        }
-        public async Task<Seller> GetBelagroResult(string search, CancellationToken cancellationToken)
+        }*/
+        /*public async Task<Seller> GetBelagroResult(string search, CancellationToken cancellationToken)
         {
-            var siteModel = new Seller("Belagro", "https://1belagro.by");
-            siteModel.SearchUrl = $"{siteModel.Host}/search/?q={search}";
-            var siteNode = new SellerNodes
-            {
-                NameNode = "div/a",
-                PriceNode = "div[3]/span[1]",
-                PictureNode = "div[1]/img",
-                PictureAttribute = "src",
-                CatNumberNode = "div[2]/div/span",
-                StatusNode = "div[3]/span[2]",
-                CardUrlNode = "div[2]/a"
-            };
-
             ResponseContent responseContent = new();
             try
             {
@@ -256,11 +205,12 @@ namespace PriceSpy.Web.Models
             return siteModel;
 
 
-        }
-        public async Task<Seller> GetMazrezervResult(string search, CancellationToken cancellationToken)
+        }*/
+        /*public async Task<Seller> GetMazrezervResult(string search, CancellationToken cancellationToken)
         {
-            var siteModel = new Seller("Mazrezerv", "https://www.mazrezerv.ru");
-            var siteNode = new SellerNodes
+            var siteModel = new Seller("Mazrezerv");
+            siteModel.Host = "https://www.mazrezerv.ru";
+            SellersNodes siteNode = new SellersNodes
             {
                 NameNode = "td[3]",
                 PriceNode = "td[7]",
@@ -301,18 +251,22 @@ namespace PriceSpy.Web.Models
                             card.CatNumber = GetCatNumber(siteNode.CatNumberNode, cardNode);
                             card.Status = GetStatus(siteNode.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
-                            if (card.Status == "0" || card.Status == "Неизвестный статус")
-                            {
-                                card.IsAvailable = false;
-                                card.Status = "Нет в наличии";
-                            }
-                            else
-                            {
-                                card.IsAvailable = true;
-                                card.Status = $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт.";
-                            }
+                            //if (card.Status == "0" || card.Status == "Неизвестный статус")
+                            //{
+                            //    card.IsAvailable = false;
+                            //    card.Status = "Нет в наличии";
+                            //}
+                            //else
+                            //{
+                            //    card.IsAvailable = true;
+                            //    card.Status = $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт.";
+                            //}
 
-                            card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
+                                //if (card.Status != "Нет в наличии")
+                                //{
+                                //    card.Status = $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт.";
+                                //}
+                                card.CardUrl = GetCardUrl(siteNode.CardUrlNode, cardNode);
                             siteModel.CardList.Add(card);
                             }
 
@@ -328,6 +282,62 @@ namespace PriceSpy.Web.Models
             }
 
             return siteModel;
+        }*/
+        public async Task<Seller> GetResultsAsync(string search, SellersNodes sellersNodes, CancellationToken cancellationToken)
+        {
+
+            ResponseContent responseContent = new();
+            Seller? seller = new(sellersNodes.SiteName);
+            if (sellersNodes.SiteName == "Mazrezerv")
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                string encodedSearch = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
+                seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", encodedSearch);
+            }
+            else
+            {
+                seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", search);
+            }
+
+            try
+            {
+                var httpResult = await httpClient.GetAsync(seller.SearchUrl, cancellationToken);
+                if (!httpResult.IsSuccessStatusCode) return seller;
+                else
+                {
+                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(htmlResult);
+                    seller.IsAvailable = true;
+                    HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes(sellersNodes.SearchResultsNode);
+                    if (nodes != null)
+                    {
+                        foreach (var cardNode in nodes)
+                        {
+                            Card card = new();
+                            card.UrlPrefix = sellersNodes.SiteHost;
+                            card.Name = GetName(sellersNodes.NameNode, cardNode);
+                            card.Price = GetPrice(sellersNodes.PriceNode, cardNode);
+                            card.Picture = GetPicture(sellersNodes.PictureNode, card.UrlPrefix, cardNode, sellersNodes.PictureAttribute);
+                            card.CatNumber = GetCatNumber(sellersNodes.CatNumberNode, cardNode);
+                            card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
+                            card.IsAvailable = GetAvailable(card.Status);
+                            card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
+                            seller.CardList.Add(card);
+                        }
+                        seller.CardList = seller.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                responseContent.Message = ex.ToString();
+                responseContent.isAvailable = false;
+            }
+
+            return seller;
+
         }
         private static string GetName(string nameNode, HtmlNode cardNode)
         {
@@ -382,7 +392,9 @@ namespace PriceSpy.Web.Models
                 cardStatus = cardNode.SelectSingleNode(statusNode)?.Attributes[0].Value.Trim();
             if (cardStatus == "city store-none") return cardStatus = "Под заказ";
             if (cardStatus == "city") return cardStatus = "В наличии";
+            if (cardStatus == "0") return cardStatus = "Нет в наличии";
             if (String.IsNullOrEmpty(cardStatus)) cardStatus = "Неизвестный статус";
+            if (cardNode.SelectSingleNode("td[5]") != null ) cardStatus = $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт."; // Mazrezerv only
             return cardStatus;
         }
         private static bool GetAvailable(string statusNode) => statusNode.ToLower() switch
@@ -390,11 +402,13 @@ namespace PriceSpy.Web.Models
             "нет в наличии" => false,
             "неизвестный статус" => false,
             "под заказ" => false,
+            "0" => false,
+            "товар в пути" => false,
             "в наличии" => true,
             "менее 10 шт" => true,
             "на складе: >10 шт." => true,
             "на складе: <10 шт." => true,
-            _ => false
+            _ => true
         };
         private static string GetCardUrl(string cardUrlNode, HtmlNode cardNode)
         {

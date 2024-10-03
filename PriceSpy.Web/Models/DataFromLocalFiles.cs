@@ -1,26 +1,15 @@
+using System.Text.Json;
+using System;
+using System.IO;
+
 namespace PriceSpy.Web.Models
 {
     public static class DataFromLocalFiles
     {
-        static string pathWithPrices = (AppDomain.CurrentDomain.BaseDirectory);
-        public static float GetExchangeRates()
-        {
-            string File = "/Currency.txt";
-            string pathExchangeRates = pathWithPrices + File;
-            FileInfo fileInf = new FileInfo(pathExchangeRates);
-            if (fileInf.Exists)
-            {
-                StreamReader streamReader = new StreamReader(pathExchangeRates);
+        public static readonly string pathWithPrices = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Prices");
+        private static readonly string _sellersNodesFile = "Nodes.json";
+        private static readonly string _pathSellersNodesFile = Path.Combine(pathWithPrices, _sellersNodesFile);
 
-                string? rate = streamReader.ReadLine();
-                if (!string.IsNullOrEmpty(rate)) rate = rate.Replace(".", ",");
-                if (!float.TryParse(rate, out float rateExchange)) rateExchange = 1;
-                Console.WriteLine(rateExchange);
-                return rateExchange;
-            }
-            else return 1;
-            
-        }
         public static Shipper PriceNameHandler (Shipper shipper, string priceName)
         {
             if (priceName.Length > 4) priceName = priceName.Substring(0, priceName.Length - 4);
@@ -31,6 +20,47 @@ namespace PriceSpy.Web.Models
             priceName = priceName.Replace("(Áåç ÍÄÑ)", "", StringComparison.OrdinalIgnoreCase);
             shipper.Name = priceName;
             return shipper;
+        }
+        public static async Task GetSellersNodesFromFileAsync ()
+        {
+            FileInfo fileInf = new FileInfo(_pathSellersNodesFile);
+            if (fileInf.Exists)
+            {
+                try
+                {
+                    string sellersNodesJsonString = await File.ReadAllTextAsync(_pathSellersNodesFile);
+                    SampleViewModel.Sellers = JsonSerializer.Deserialize<ICollection<SellersNodes>>(sellersNodesJsonString);
+                    //using FileStream fs = new(_pathSellersNodesFile, FileMode.OpenOrCreate);
+                    //SampleViewModel.Sellers = (ICollection<SellersNodes>)JsonSerializer.DeserializeAsyncEnumerable<SellersNodes>(fs);
+                    foreach (SellersNodes item in SampleViewModel.Sellers)
+                    {
+                        Console.WriteLine("Nodes " + item?.SiteName + " downloaded");
+                    }
+                    
+                }
+                catch
+                {
+                    Console.WriteLine("Couldn`t load file " + _sellersNodesFile);
+                    SiteNodes.SetNodes();
+                }
+
+
+            }
+            else
+            {
+                SiteNodes.SetNodes();
+                
+            }
+        }
+        public static async void WriteNodesInFile()
+        {
+            var option = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            string sellersNodesJsonString = JsonSerializer.Serialize(SampleViewModel.Sellers, option);
+            await File.WriteAllTextAsync(_pathSellersNodesFile, sellersNodesJsonString);
+            Console.WriteLine("File saved " + _sellersNodesFile);
         }
     }
 }

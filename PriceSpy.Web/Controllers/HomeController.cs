@@ -20,9 +20,11 @@ namespace PriceSpy.Web.Controllers
 
         public async Task <IActionResult> Index()
         {
-            await RateHandler.GetRateFromFileAsync();
-            /// Deserialize SiteNodes(XPath) from file.json for every seller -> if file.json any error - write json from code
-            XmlHandler.Load();
+            Console.WriteLine("-------------------");
+            Console.WriteLine("Loading local files");
+            await RateHandler.GetRateFromFileAsync(); ///Move to DataFromLocalFiles
+            await SiteNodes.GetSellersNodesAsync();   ///Move to DataFromLocalFiles
+            XmlHandler.Load(); /// await
             return View("Index");
         }
 
@@ -33,12 +35,16 @@ namespace PriceSpy.Web.Controllers
             SampleViewModel.Search = searchQuery;
             XmlHandler.Search(searchQuery);
             SampleViewModel.Sites.Clear();
-            SampleViewModel.Sites.Add(await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken));
-            SampleViewModel.Sites.Add(await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken));
-            SampleViewModel.Sites.Add(await htmlReader.GetAkvilonResultAsync(searchQuery, cancellationToken));
-            SampleViewModel.Sites.Add(await htmlReader.GetBelagroResult(searchQuery, cancellationToken));
-            SampleViewModel.Sites.Add(await htmlReader.GetMazrezervResult(searchQuery, cancellationToken));
+            //SampleViewModel.Sites.Add(await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken));
+            //SampleViewModel.Sites.Add(await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken));
+            //SampleViewModel.Sites.Add(await htmlReader.GetAkvilonResultAsync(searchQuery, cancellationToken));
+            //SampleViewModel.Sites.Add(await htmlReader.GetBelagroResult(searchQuery, cancellationToken));
+            //SampleViewModel.Sites.Add(await htmlReader.GetMazrezervResult(searchQuery, cancellationToken));
 
+            foreach (var sellersNodes in SampleViewModel.Sellers)
+            {
+                SampleViewModel.Sites.Add(await htmlReader.GetResultsAsync(searchQuery, sellersNodes, cancellationToken));
+            }
             return View("Results");
         }
 

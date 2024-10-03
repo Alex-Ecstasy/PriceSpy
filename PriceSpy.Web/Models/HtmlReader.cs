@@ -22,7 +22,6 @@ namespace PriceSpy.Web.Models
             this.httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
-
         /* public async Task<Seller> GetTurbokResultsAsync(string search, CancellationToken cancellationToken)
         {
             ResponseContent responseContent = new();
@@ -67,8 +66,8 @@ namespace PriceSpy.Web.Models
 
             return siteModel;
 
-        }
-        public async Task<Seller> GetMagnitResultAsync(string search, CancellationToken cancellationToken)
+        }*/
+        /*public async Task<Seller> GetMagnitResultAsync(string search, CancellationToken cancellationToken)
         {
             ResponseContent responseContent = new();
 
@@ -291,13 +290,9 @@ namespace PriceSpy.Web.Models
             if (sellersNodes.SiteName == "Mazrezerv")
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                string encodedSearch = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
-                seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", encodedSearch);
+                search = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
             }
-            else
-            {
                 seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", search);
-            }
 
             try
             {
@@ -312,20 +307,31 @@ namespace PriceSpy.Web.Models
                     HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes(sellersNodes.SearchResultsNode);
                     if (nodes != null)
                     {
-                        foreach (var cardNode in nodes)
+                        for(int i = 0; i < nodes.Count; i++)
                         {
+                            var cardNode = nodes[i];
+                            if (sellersNodes.SiteName == "Akvilon")
+                            {
+                                string id = cardNode.GetAttributeValue("id", "");
+                                string prodId = $"//*[@id=\"{id}\"]";
+                                var cardNodeFromId = doc.DocumentNode.SelectSingleNode(prodId).ParentNode;
+                                cardNode = cardNodeFromId;
+                            }
                             Card card = new();
                             card.UrlPrefix = sellersNodes.SiteHost;
+                            string name = GetName(sellersNodes.NameNode, cardNode);
                             card.Name = GetName(sellersNodes.NameNode, cardNode);
-                            card.Price = GetPrice(sellersNodes.PriceNode, cardNode);
+                            card.Price = GetPrice(sellersNodes.PriceNode, cardNode);// if .ru => Price*SampleViewModel.Rate
                             card.Picture = GetPicture(sellersNodes.PictureNode, card.UrlPrefix, cardNode, sellersNodes.PictureAttribute);
-                            card.CatNumber = GetCatNumber(sellersNodes.CatNumberNode, cardNode);
+                            card.CatNumber = GetCatNumber(sellersNodes.CatNumberNode, cardNode, ref name);
+                            card.Name = name;
                             card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
                             card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
                             seller.CardList.Add(card);
                         }
                         seller.CardList = seller.CardList.OrderByDescending(x => x.IsAvailable).ToList();
+                        nodes.Clear();
                     }
                 }
             }
@@ -375,9 +381,10 @@ namespace PriceSpy.Web.Models
             }
             return cardPicture;
         }
-        private static string GetCatNumber(string catNumberNode, HtmlNode cardNode)
+        private static string GetCatNumber(string catNumberNode, HtmlNode cardNode,ref string name)
         {
             string? cardCatNumber = String.Empty;
+            if (String.IsNullOrEmpty(catNumberNode)) return cardCatNumber = Splite(ref name);
             if (cardNode.SelectSingleNode(catNumberNode) == null) return cardCatNumber = "-----";
             cardCatNumber = cardNode.SelectSingleNode(catNumberNode)?.InnerText.Trim();
             if (String.IsNullOrEmpty(cardCatNumber)) cardCatNumber = "-----";

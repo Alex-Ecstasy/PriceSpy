@@ -310,13 +310,13 @@ namespace PriceSpy.Web.Models
                         for(int i = 0; i < nodes.Count; i++)
                         {
                             var cardNode = nodes[i];
-                            if (sellersNodes.SiteName == "Akvilon")
+                            if (!string.IsNullOrEmpty(sellersNodes.ProdId))
                             {
                                 string id = cardNode.GetAttributeValue("id", "");
-                                string prodId = $"//*[@id=\"{id}\"]";
-                                var cardNodeFromId = doc.DocumentNode.SelectSingleNode(prodId).ParentNode;
-                                cardNode = cardNodeFromId;
+                                if (string.IsNullOrEmpty(id)) continue;
+                                cardNode = doc.DocumentNode.SelectSingleNode(sellersNodes.ProdId.Replace("ProdId", id));
                             }
+
                             Card card = new();
                             card.UrlPrefix = sellersNodes.SiteHost;
                             string name = GetName(sellersNodes.NameNode, cardNode);
@@ -324,7 +324,7 @@ namespace PriceSpy.Web.Models
                             card.Price = GetPrice(sellersNodes.PriceNode, cardNode);// if .ru => Price*SampleViewModel.Rate
                             card.Picture = GetPicture(sellersNodes.PictureNode, card.UrlPrefix, cardNode, sellersNodes.PictureAttribute);
                             card.CatNumber = GetCatNumber(sellersNodes.CatNumberNode, cardNode, ref name);
-                            card.Name = name;
+                            card.Name = RemoveCatNumber(name, card.CatNumber);
                             card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
                             card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
@@ -345,6 +345,16 @@ namespace PriceSpy.Web.Models
             return seller;
 
         }
+        /*private static HtmlNode GetWayToParse(SellersNodes sellersNodes, HtmlNode cardNode, HtmlDocument doc)
+        {
+            if (!string.IsNullOrEmpty(sellersNodes.ProdId))
+            {
+                string id = cardNode.GetAttributeValue("id", "");
+                string prodId = $"//*[@id=\"{id}\"]";
+                cardNode = doc.DocumentNode.SelectSingleNode(prodId).ParentNode;
+                return cardNode;
+            }
+        }*/
         private static string GetName(string nameNode, HtmlNode cardNode)
         {
             string? cardName = String.Empty;
@@ -388,6 +398,7 @@ namespace PriceSpy.Web.Models
             if (cardNode.SelectSingleNode(catNumberNode) == null) return cardCatNumber = "-----";
             cardCatNumber = cardNode.SelectSingleNode(catNumberNode)?.InnerText.Trim();
             if (String.IsNullOrEmpty(cardCatNumber)) cardCatNumber = "-----";
+            if (cardCatNumber.Length > 30) return cardCatNumber.Remove(30, cardCatNumber.Length);
             return cardCatNumber;
         }
         private static string GetStatus(string statusNode, HtmlNode cardNode)
@@ -477,18 +488,18 @@ namespace PriceSpy.Web.Models
             return cardPicture;
         
     }
-        private static string SpliteBelagro(string cardName, string cardNumber)
+        private static string RemoveCatNumber(string cardName, string cardNumber)
         {
             if (cardName.Contains(cardNumber)) cardName = cardName.Replace(cardNumber, "").Trim();
-            else
-            {
-                // Deleting chars (cardNumber) before first space
-                int charIndexForTrim = cardName.IndexOf(' ');
-                if (charIndexForTrim <= 0) charIndexForTrim = 0;
-                //cardNumber = cardName.Substring(0, charIndexForTrim).Trim();
-                //if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
-                cardName = cardName.Substring(charIndexForTrim).Trim();
-            }
+            //else
+            //{
+            //    // Deleting chars (cardNumber) before first space
+            //    int charIndexForTrim = cardName.IndexOf(' ');
+            //    if (charIndexForTrim <= 0) charIndexForTrim = 0;
+            //    //cardNumber = cardName.Substring(0, charIndexForTrim).Trim();
+            //    //if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
+            //    cardName = cardName.Substring(charIndexForTrim).Trim();
+            //}
 
             return cardName;
         }

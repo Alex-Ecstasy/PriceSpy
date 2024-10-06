@@ -42,6 +42,7 @@
         public string? SiteHost { get; set; }
         public string? SearchUrl { get; set; }
         public string? SearchResultsNode { get; set; }
+        public string? ProdId { get; set; }
         public string? NameNode { get; set; }
         public string? PriceNode { get; set; }
         public string? PictureNode { get; set; }

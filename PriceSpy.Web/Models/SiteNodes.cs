@@ -47,13 +47,14 @@
                 SiteName = "Akvilon",
                 SiteHost = "https://akvilonavto.by",
                 SearchResultsNode = "//div[@data-productid]",
-                NameNode = "div/div[1]/div[2]/div[1]",
-                PriceNode = "div/div[1]/div[3]/div/span/span[2]",
-                PictureNode = "div/div[1]/div[1]/div[1]/img",
+                ProdId = "//*[@id=\"ProdId\"]",
+                NameNode = "../div/div[1]/div[2]/div[1]",
+                PriceNode = "../div/div[1]/div[3]/div/span/span[2]",
+                PictureNode = "../div/div[1]/div[1]/div[1]/img",
                 PictureAttribute = "data-src",
                 CatNumberNode = "",
-                StatusNode = "div/div[2]/div[1]/div[1]/div/div/span/span",
-                CardUrlNode = "div/div[1]/div[2]/div[1]/a"
+                StatusNode = "../div/div[2]/div[1]/div[1]/div/div/span/span",
+                CardUrlNode = "../div/div[1]/div[2]/div[1]/a"
             };
             akvilonNode.SearchUrl = $"{akvilonNode.SiteHost}/catalog/?q={search}";
             SampleViewModel.Sellers.Add(akvilonNode);
@@ -81,6 +82,7 @@
                 SiteName = "Mazrezerv",
                 SiteHost = "https://www.mazrezerv.ru",
                 SearchResultsNode = "//*[@id=\"print\"]/table/tr",
+                ProdId = "//*[@id=\"ProdId\"]",
                 NameNode = "td[3]",
                 PriceNode = "td[7]",
                 PictureNode = "td[2]/a",

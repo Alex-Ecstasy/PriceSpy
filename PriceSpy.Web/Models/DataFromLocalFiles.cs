@@ -6,9 +6,10 @@ namespace PriceSpy.Web.Models
 {
     public static class DataFromLocalFiles
     {
-        public static readonly string pathWithPrices = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Prices");
+        public static readonly string pathPrices = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Prices");
+        public static readonly string pathData = Path.Combine(pathPrices, "Data");
         private static readonly string _sellersNodesFile = "Nodes.json";
-        private static readonly string _pathSellersNodesFile = Path.Combine(pathWithPrices, _sellersNodesFile);
+        private static readonly string _pathSellersNodesFile = Path.Combine(pathData, _sellersNodesFile);
 
         public static Shipper PriceNameHandler (Shipper shipper, string priceName)
         {
@@ -61,6 +62,16 @@ namespace PriceSpy.Web.Models
             string sellersNodesJsonString = JsonSerializer.Serialize(SampleViewModel.Sellers, option);
             await File.WriteAllTextAsync(_pathSellersNodesFile, sellersNodesJsonString);
             Console.WriteLine("File saved " + _sellersNodesFile);
+        }
+        public static void CheckPaths()
+        {
+            DirectoryInfo pricesDir = new DirectoryInfo(pathPrices);
+            if (!pricesDir.Exists) pricesDir.Create();
+
+
+            DirectoryInfo dataDir = new DirectoryInfo(pathData);
+            if (!dataDir.Exists) dataDir.Create();
+            
         }
     }
 }

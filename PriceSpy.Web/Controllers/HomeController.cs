@@ -22,8 +22,10 @@ namespace PriceSpy.Web.Controllers
         {
             Console.WriteLine("-------------------");
             Console.WriteLine("Loading local files");
+            DataFromLocalFiles.CheckPaths();
             await RateHandler.GetRateFromFileAsync(); ///Move to DataFromLocalFiles
             await SiteNodes.GetSellersNodesAsync();   ///Move to DataFromLocalFiles
+            DataBaseHandler.LoadAsync();
             XmlHandler.Load(); /// await
             return View("Index");
         }

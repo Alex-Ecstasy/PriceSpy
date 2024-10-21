@@ -12,7 +12,7 @@ namespace PriceSpy.Web.Models
     public static class RateHandler
     {
         private static string _rateFile = "Rate.txt";
-        private static string _pathRateFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), _rateFile);
+        private static string _pathRateFile = Path.Combine(DataFromLocalFiles.pathData, _rateFile);
         
         public static async Task CheckRateAsync(string rate)
         {

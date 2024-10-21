@@ -59,6 +59,7 @@ namespace PriceSpy.Web.Models
                             card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
                             card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
+                            //DataBaseHandler.OpenAsync(card);
                             seller.CardList.Add(card);
                         }
                         seller.CardList = seller.CardList.OrderByDescending(x => x.IsAvailable).ToList();

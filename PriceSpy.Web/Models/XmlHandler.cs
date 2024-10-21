@@ -7,7 +7,7 @@ namespace PriceSpy.Web.Models
     {
         public static void Load()
         {
-            DirectoryInfo fileList = new DirectoryInfo(DataFromLocalFiles.pathWithPrices);
+            DirectoryInfo fileList = new DirectoryInfo(DataFromLocalFiles.pathPrices);
             SampleViewModel.Shippers.Clear();
             if (fileList.Exists)
             {

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 using PriceSpy.Web.Models;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PriceSpy.Web.Controllers
 {
@@ -25,7 +27,6 @@ namespace PriceSpy.Web.Controllers
             DataFromLocalFiles.CheckPaths();
             await RateHandler.GetRateFromFileAsync(); ///Move to DataFromLocalFiles
             await SiteNodes.GetSellersNodesAsync();   ///Move to DataFromLocalFiles
-            DataBaseHandler.LoadAsync();
             XmlHandler.Load(); /// await
             return View("Index");
         }
@@ -37,16 +38,16 @@ namespace PriceSpy.Web.Controllers
             SampleViewModel.Search = searchQuery;
             XmlHandler.Search(searchQuery);
             SampleViewModel.Sites.Clear();
-            //SampleViewModel.Sites.Add(await htmlReader.GetTurbokResultsAsync(searchQuery, cancellationToken));
-            //SampleViewModel.Sites.Add(await htmlReader.GetMagnitResultAsync(searchQuery, cancellationToken));
-            //SampleViewModel.Sites.Add(await htmlReader.GetAkvilonResultAsync(searchQuery, cancellationToken));
-            //SampleViewModel.Sites.Add(await htmlReader.GetBelagroResult(searchQuery, cancellationToken));
-            //SampleViewModel.Sites.Add(await htmlReader.GetMazrezervResult(searchQuery, cancellationToken));
-
+            Stopwatch swatch = new();
+            swatch.Start();
+            SqliteConnection connection = await DataBaseHandler.LoadAsync();
             foreach (var sellersNodes in SampleViewModel.Sellers)
             {
-                SampleViewModel.Sites.Add(await htmlReader.GetResultsAsync(searchQuery, sellersNodes, cancellationToken));
+                SampleViewModel.Sites.Add(await htmlReader.GetResultsAsync(searchQuery, sellersNodes, connection, cancellationToken));
             }
+            await connection.CloseAsync();
+            swatch.Stop();
+            Console.WriteLine(swatch.Elapsed);
             return View("Results");
         }
 

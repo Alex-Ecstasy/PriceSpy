@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using static System.Text.Encoding;
 using System.Web;
+using Microsoft.Data.Sqlite;
 
 namespace PriceSpy.Web.Models
 {
@@ -14,7 +15,7 @@ namespace PriceSpy.Web.Models
             this.httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
-        public async Task<Seller> GetResultsAsync(string search, SellersNodes sellersNodes, CancellationToken cancellationToken)
+        public async Task<Seller> GetResultsAsync(string search, SellersNodes sellersNodes, SqliteConnection connection, CancellationToken cancellationToken)
         {
 
             ResponseContent responseContent = new();
@@ -59,7 +60,7 @@ namespace PriceSpy.Web.Models
                             card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
                             card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
-                            //DataBaseHandler.OpenAsync(card);
+                            DataBaseHandler.FindElementInDb(card, connection); //Too slow
                             seller.CardList.Add(card);
                         }
                         seller.CardList = seller.CardList.OrderByDescending(x => x.IsAvailable).ToList();
@@ -92,8 +93,8 @@ namespace PriceSpy.Web.Models
             var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim().Replace("&nbsp;", "").Replace("р.", "").Replace("руб.", "").Replace("/комплект", "").Replace(".", ",").Replace("от", "");
             bool isRightPrice = float.TryParse(priceText, NumberStyles.Any, CultureInfo.CurrentCulture, out float price);
             if (isRightPrice) cardPrice = price;
-            if (host.Contains(".ru")) return price * SampleViewModel.Rate;
-            return cardPrice;
+            if (host.Contains(".ru")) cardPrice = price * SampleViewModel.Rate;
+            return (float)Math.Round(cardPrice, 2);
         }
         private static string GetPicture(string pictureNode, string prefixNode, HtmlNode cardNode, string pictureAttribute)
         {

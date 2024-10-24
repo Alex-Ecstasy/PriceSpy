@@ -81,53 +81,68 @@ namespace PriceSpy.Web.Models
             if (reader.Read())
             {
                 float? currentPrice = card.Price;
-                float? actualPriceDb = reader.GetFloat(1);
-                float? minPriceDb = reader.GetFloat(2);
-                float? maxPriceDb = reader.GetFloat(3);
-                if (currentPrice == actualPriceDb)
-                {
-                    //Console.WriteLine($@"Parse {actualPriceDb} " + card.Name);
-                    return;
-                }
-
-                //if (currentPrice > actualPriceDb)
-                //{
-                //    string updateMinPriceQuery = "UPDATE Products SET MinPrice = @minPrice, MinPriceDate = @minPriceDate WHERE ID = @id";
-                //    using var updateCommand = new SqliteCommand(updateMinPriceQuery, connection);
-                //    var productID = card.UrlPrefix + card.CardUrl;
-                //    updateCommand.Parameters.AddWithValue("@id", productID);
-                //    updateCommand.Parameters.AddWithValue("@actualPrice", card.Price);
-                //    updateCommand.Parameters.AddWithValue("@actualDate", actualDate);
-                //}
-                //else
-                //{
-                //    string updateMaxPriceQuery = "UPDATE Products SET MaxPrice = @maxPrice, MaxPriceDate = @maxPriceDate WHERE ID = @id";
-                //}
-
+                float? actualPriceDb = reader.IsDBNull(1) ? null : reader.GetFloat(1);
+                float? minPriceDb = reader.IsDBNull(2) ? null : reader.GetFloat(2);
+                float? maxPriceDb = reader.IsDBNull(3) ? null : reader.GetFloat(3);
+                DateTime? currentDate = DateTime.Now;
+                DateTime? actualPriceDateDb = reader.IsDBNull(4) ? null : reader.GetDateTime (4);
+                DateTime? minPriceDateDb = reader.IsDBNull(5) ? null : reader.GetDateTime(5);
+                DateTime? maxPriceDateDb = reader.IsDBNull(6) ? null : reader.GetDateTime(6);
+                if (minPriceDb == 0) minPriceDb = null;
+                if (maxPriceDb == 0) maxPriceDb = null;
+                if (currentPrice == actualPriceDb) return;
                 if (currentPrice > actualPriceDb)
-                {//     10              1
-                    currentPrice = actualPriceDb; //currentPrice < maxPriceDb
-                    //       10             9
-                    if (currentPrice >= maxPriceDb)
+                {
+                    if (currentPrice >= maxPriceDb || maxPriceDb == null)
                     {
                         maxPriceDb = currentPrice;
+                        maxPriceDateDb = currentDate;
                     }
 
+                    if (minPriceDb == null) 
+                    {
+                        minPriceDb = actualPriceDb;
+                        minPriceDateDb = actualPriceDateDb;
+                    }
+                    
                 }
-
                 if (currentPrice < actualPriceDb)
-                {//          1             10
-                    currentPrice = actualPriceDb; //currentPrice > minPriceDb
-                    //       1              10
-                    if (currentPrice <= minPriceDb)
+                {
+                    if (currentPrice <= minPriceDb || minPriceDb == null)
                     {
                         minPriceDb = currentPrice;
+                        minPriceDateDb = currentDate;
+                    }
+
+                    if (maxPriceDb == null)
+                    {
+                        maxPriceDb = actualPriceDb;
+                        maxPriceDateDb = actualPriceDateDb;
                     }
                 }
+                actualPriceDb = currentPrice;
+                actualPriceDateDb = currentDate;
 
+                string updateQuery = @"UPDATE Products 
+                                          SET ActualPrice = round(@actualPriceDb, 2),
+                                              MinPrice = round(@minPriceDb, 2),
+                                              MaxPrice = round(@maxPriceDb, 2),
+                                              ActualDate = @actualPriceDateDb,
+                                              MinPriceDate = @minPriceDateDb,
+                                              MaxPriceDate = @maxPriceDateDb
+                                        WHERE ID = @id";
+
+                using var updateCommand = new SqliteCommand(updateQuery, connection);
+                var productID = card.UrlPrefix + card.CardUrl;
+                updateCommand.Parameters.AddWithValue("@id", productID);
+                updateCommand.Parameters.AddWithValue("@actualPriceDb", actualPriceDb);
+                updateCommand.Parameters.AddWithValue("@minPriceDb", minPriceDb);
+                updateCommand.Parameters.AddWithValue("@maxPriceDb", maxPriceDb);
+                updateCommand.Parameters.AddWithValue("@actualPriceDateDb", actualPriceDateDb);
+                updateCommand.Parameters.AddWithValue("@minPriceDateDb", minPriceDateDb);
+                updateCommand.Parameters.AddWithValue("@maxPriceDateDb", maxPriceDateDb);
+                updateCommand.ExecuteNonQuery();
             }
-
         }
     }
-    
 }

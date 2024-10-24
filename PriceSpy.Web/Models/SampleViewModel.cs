@@ -10,6 +10,13 @@
         public string? CardUrl { get; set; }
         public bool IsAvailable { get; set; }
         public string? UrlPrefix { get; set; }
+        public float? actualPriceDb { get; set; }
+        public float? minPriceDb { get; set; }
+        public float? maxPriceDb { get; set; }
+        public DateTime? actualPriceDateDb { get; set; }
+        public DateTime? minPriceDateDb { get; set; }
+        public DateTime? maxPriceDateDb { get; set; }
+
     }
 
     public class Seller

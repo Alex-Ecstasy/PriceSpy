@@ -88,15 +88,29 @@ namespace PriceSpy.Web.Models
                         dbValues[i] = reader.IsDBNull(i) ? null : reader.GetString(i);
                         dbValues[i] = dbValues[i] == "" ? null : dbValues[i];
                     }
-                    
+                    float? actualPriceDb = null, minPriceDb = null, maxPriceDb = null;
+                    DateTime? actualPriceDateDb = null, minPriceDateDb = null, maxPriceDateDb = null;
+                    try
+                    {
+                        actualPriceDb = dbValues[1] == null ? null : float.Parse(dbValues[1], System.Globalization.CultureInfo.InvariantCulture);
+                        minPriceDb = dbValues[2] == null ? null : float.Parse(dbValues[2], System.Globalization.CultureInfo.InvariantCulture);
+                        maxPriceDb = dbValues[3] == null ? null : float.Parse(dbValues[3], System.Globalization.CultureInfo.InvariantCulture);
+                        actualPriceDateDb = dbValues[4] == null ? null : DateTime.Parse(dbValues[4]);
+                        minPriceDateDb = dbValues[5] == null ? null : DateTime.Parse(dbValues[5]);
+                        maxPriceDateDb = dbValues[6] == null ? null : DateTime.Parse(dbValues[6]);
+                        card.actualPriceDb = actualPriceDb;
+                        card.minPriceDb = minPriceDb;
+                        card.maxPriceDb = maxPriceDb;
+                        card.actualPriceDateDb = actualPriceDateDb;
+                        card.minPriceDateDb = minPriceDateDb;
+                        card.maxPriceDateDb = maxPriceDateDb;
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("DB Parse Error");
+                    }
                     float? currentPrice = card.Price;
-                    float? actualPriceDb = dbValues[1] == null ? null : float.Parse(dbValues[1], System.Globalization.CultureInfo.InvariantCulture);
-                    float? minPriceDb = dbValues[2] == null ? null : float.Parse(dbValues[2], System.Globalization.CultureInfo.InvariantCulture);
-                    float? maxPriceDb = dbValues[3] == null ? null : float.Parse(dbValues[3], System.Globalization.CultureInfo.InvariantCulture);
                     DateTime? currentDate = DateTime.Now;
-                    DateTime? actualPriceDateDb = dbValues[4] == null ? null : DateTime.Parse(dbValues[4]);
-                    DateTime? minPriceDateDb = dbValues[5] == null ? null : DateTime.Parse(dbValues[5]);
-                    DateTime? maxPriceDateDb = dbValues[6] == null ? null : DateTime.Parse(dbValues[6]);
                     if (minPriceDb == 0) minPriceDb = null;
                     if (maxPriceDb == 0) maxPriceDb = null;
                     if (currentPrice == actualPriceDb) return;

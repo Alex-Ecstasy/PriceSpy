@@ -80,50 +80,59 @@ namespace PriceSpy.Web.Models
         {
             if (reader.Read())
             {
-                float? currentPrice = card.Price;
-                float? actualPriceDb = reader.IsDBNull(1) ? null : reader.GetFloat(1);
-                float? minPriceDb = reader.IsDBNull(2) ? null : reader.GetFloat(2);
-                float? maxPriceDb = reader.IsDBNull(3) ? null : reader.GetFloat(3);
-                DateTime? currentDate = DateTime.Now;
-                DateTime? actualPriceDateDb = reader.IsDBNull(4) ? null : reader.GetDateTime (4);
-                DateTime? minPriceDateDb = reader.IsDBNull(5) ? null : reader.GetDateTime(5);
-                DateTime? maxPriceDateDb = reader.IsDBNull(6) ? null : reader.GetDateTime(6);
-                if (minPriceDb == 0) minPriceDb = null;
-                if (maxPriceDb == 0) maxPriceDb = null;
-                if (currentPrice == actualPriceDb) return;
-                if (currentPrice > actualPriceDb)
+                try
                 {
-                    if (currentPrice >= maxPriceDb || maxPriceDb == null)
+                    string?[] dbValues = new string[7];
+                    for (int i = 0; i < 7; i++)
                     {
-                        maxPriceDb = currentPrice;
-                        maxPriceDateDb = currentDate;
-                    }
-
-                    if (minPriceDb == null) 
-                    {
-                        minPriceDb = actualPriceDb;
-                        minPriceDateDb = actualPriceDateDb;
+                        dbValues[i] = reader.IsDBNull(i) ? null : reader.GetString(i);
+                        dbValues[i] = dbValues[i] == "" ? null : dbValues[i];
                     }
                     
-                }
-                if (currentPrice < actualPriceDb)
-                {
-                    if (currentPrice <= minPriceDb || minPriceDb == null)
+                    float? currentPrice = card.Price;
+                    float? actualPriceDb = dbValues[1] == null ? null : float.Parse(dbValues[1], System.Globalization.CultureInfo.InvariantCulture);
+                    float? minPriceDb = dbValues[2] == null ? null : float.Parse(dbValues[2], System.Globalization.CultureInfo.InvariantCulture);
+                    float? maxPriceDb = dbValues[3] == null ? null : float.Parse(dbValues[3], System.Globalization.CultureInfo.InvariantCulture);
+                    DateTime? currentDate = DateTime.Now;
+                    DateTime? actualPriceDateDb = dbValues[4] == null ? null : DateTime.Parse(dbValues[4]);
+                    DateTime? minPriceDateDb = dbValues[5] == null ? null : DateTime.Parse(dbValues[5]);
+                    DateTime? maxPriceDateDb = dbValues[6] == null ? null : DateTime.Parse(dbValues[6]);
+                    if (minPriceDb == 0) minPriceDb = null;
+                    if (maxPriceDb == 0) maxPriceDb = null;
+                    if (currentPrice == actualPriceDb) return;
+                    if (currentPrice > actualPriceDb)
                     {
-                        minPriceDb = currentPrice;
-                        minPriceDateDb = currentDate;
-                    }
+                        if (currentPrice >= maxPriceDb || maxPriceDb == null)
+                        {
+                            maxPriceDb = currentPrice;
+                            maxPriceDateDb = currentDate;
+                        }
 
-                    if (maxPriceDb == null)
+                        if (minPriceDb == null)
+                        {
+                            minPriceDb = actualPriceDb;
+                            minPriceDateDb = actualPriceDateDb;
+                        }
+
+                    }
+                    if (currentPrice < actualPriceDb)
                     {
-                        maxPriceDb = actualPriceDb;
-                        maxPriceDateDb = actualPriceDateDb;
-                    }
-                }
-                actualPriceDb = currentPrice;
-                actualPriceDateDb = currentDate;
+                        if (currentPrice <= minPriceDb || minPriceDb == null)
+                        {
+                            minPriceDb = currentPrice;
+                            minPriceDateDb = currentDate;
+                        }
 
-                string updateQuery = @"UPDATE Products 
+                        if (maxPriceDb == null)
+                        {
+                            maxPriceDb = actualPriceDb;
+                            maxPriceDateDb = actualPriceDateDb;
+                        }
+                    }
+                    actualPriceDb = currentPrice;
+                    actualPriceDateDb = currentDate;
+
+                    string updateQuery = @"UPDATE Products 
                                           SET ActualPrice = round(@actualPriceDb, 2),
                                               MinPrice = round(@minPriceDb, 2),
                                               MaxPrice = round(@maxPriceDb, 2),
@@ -132,16 +141,21 @@ namespace PriceSpy.Web.Models
                                               MaxPriceDate = @maxPriceDateDb
                                         WHERE ID = @id";
 
-                using var updateCommand = new SqliteCommand(updateQuery, connection);
-                var productID = card.UrlPrefix + card.CardUrl;
-                updateCommand.Parameters.AddWithValue("@id", productID);
-                updateCommand.Parameters.AddWithValue("@actualPriceDb", actualPriceDb);
-                updateCommand.Parameters.AddWithValue("@minPriceDb", minPriceDb);
-                updateCommand.Parameters.AddWithValue("@maxPriceDb", maxPriceDb);
-                updateCommand.Parameters.AddWithValue("@actualPriceDateDb", actualPriceDateDb);
-                updateCommand.Parameters.AddWithValue("@minPriceDateDb", minPriceDateDb);
-                updateCommand.Parameters.AddWithValue("@maxPriceDateDb", maxPriceDateDb);
-                updateCommand.ExecuteNonQuery();
+                    using var updateCommand = new SqliteCommand(updateQuery, connection);
+                    var productID = card.UrlPrefix + card.CardUrl;
+                    updateCommand.Parameters.AddWithValue("@id", productID);
+                    updateCommand.Parameters.AddWithValue("@actualPriceDb", actualPriceDb);
+                    updateCommand.Parameters.AddWithValue("@minPriceDb", minPriceDb);
+                    updateCommand.Parameters.AddWithValue("@maxPriceDb", maxPriceDb);
+                    updateCommand.Parameters.AddWithValue("@actualPriceDateDb", actualPriceDateDb);
+                    updateCommand.Parameters.AddWithValue("@minPriceDateDb", minPriceDateDb);
+                    updateCommand.Parameters.AddWithValue("@maxPriceDateDb", maxPriceDateDb);
+                    updateCommand.ExecuteNonQuery();
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Exception SetPrices");
+                }
             }
         }
     }

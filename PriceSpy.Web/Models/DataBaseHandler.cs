@@ -74,6 +74,7 @@ namespace PriceSpy.Web.Models
                 insertCommand.Parameters.AddWithValue("@actualPrice", card.Price);
                 insertCommand.Parameters.AddWithValue("@actualDate", actualDate);
                 insertCommand.ExecuteNonQuery();
+                card.IsJustAdded = true;
             }
         }
         private static void SetPrices(Card card, SqliteDataReader reader, SqliteConnection connection)
@@ -98,12 +99,12 @@ namespace PriceSpy.Web.Models
                         actualPriceDateDb = dbValues[4] == null ? null : DateTime.Parse(dbValues[4]);
                         minPriceDateDb = dbValues[5] == null ? null : DateTime.Parse(dbValues[5]);
                         maxPriceDateDb = dbValues[6] == null ? null : DateTime.Parse(dbValues[6]);
-                        card.actualPriceDb = actualPriceDb;
-                        card.minPriceDb = minPriceDb;
-                        card.maxPriceDb = maxPriceDb;
-                        card.actualPriceDateDb = actualPriceDateDb;
-                        card.minPriceDateDb = minPriceDateDb;
-                        card.maxPriceDateDb = maxPriceDateDb;
+                        card.ActualPriceDb = actualPriceDb;
+                        card.MinPriceDb = minPriceDb;
+                        card.MaxPriceDb = maxPriceDb;
+                        card.ActualPriceDateDb = actualPriceDateDb;
+                        card.MinPriceDateDb = minPriceDateDb;
+                        card.MaxPriceDateDb = maxPriceDateDb;
                     }
                     catch (Exception)
                     {

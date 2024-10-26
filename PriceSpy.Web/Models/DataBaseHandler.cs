@@ -11,6 +11,7 @@ namespace PriceSpy.Web.Models
         private static List<SqliteCommand> _batchedCommands = new();
         public static void FindElementInDb(Card card, SqliteConnection connection)
         {
+            if (!card.IsAvailable || card.Price == 0) return;
             var productID = card.UrlPrefix + card.CardUrl;
             string selectQuery = "SELECT * FROM Products WHERE ID = @id";
             using SqliteCommand selectCommand = new(selectQuery, connection);
@@ -91,8 +92,6 @@ namespace PriceSpy.Web.Models
         }
         private static void InsertElement(Card card, SqliteConnection connection)
         {
-            if (card.IsAvailable && card.Price != 0)
-            {
                 string insertQuery = @"INSERT INTO Products (ID, ActualPrice, ActualDate)
                                VALUES (@id, round(@actualPrice, 2), @actualDate)";
                 var actualDate = DateTime.Now;
@@ -102,9 +101,7 @@ namespace PriceSpy.Web.Models
                 insertCommand.Parameters.AddWithValue("@actualPrice", card.Price);
                 insertCommand.Parameters.AddWithValue("@actualDate", actualDate);
                 _batchedCommands.Add(insertCommand);
-                //await insertCommand.ExecuteNonQueryAsync();
                 card.IsJustAdded = true;
-            }
         }
         private static void SetPrices(Card card, SqliteDataReader reader, SqliteConnection connection)
         {
@@ -195,7 +192,6 @@ namespace PriceSpy.Web.Models
                     updateCommand.Parameters.AddWithValue("@minPriceDateDb", minPriceDateDb);
                     updateCommand.Parameters.AddWithValue("@maxPriceDateDb", maxPriceDateDb);
                     _batchedCommands.Add(updateCommand);
-                    //updateCommand.ExecuteNonQuery();
                 }
                 catch (Exception)
                 {

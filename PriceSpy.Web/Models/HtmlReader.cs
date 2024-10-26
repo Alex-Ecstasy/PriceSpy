@@ -17,24 +17,17 @@ namespace PriceSpy.Web.Models
         }
         public async Task<Seller> GetResultsAsync(string search, SellersNodes sellersNodes, SqliteConnection connection, CancellationToken cancellationToken)
         {
-            Seller seller = new(sellersNodes.SiteName);
-            if (sellersNodes.SiteName == "Mazrezerv")
-            {
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                search = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
-            }
-            seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", search);
-
+            Seller seller = CreateSeller(search, sellersNodes);
             try
             {
                 var httpResult = await httpClient.GetAsync(seller.SearchUrl, cancellationToken);
                 if (!httpResult.IsSuccessStatusCode) return seller;
                 else
                 {
-                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
-                    HtmlDocument doc = new HtmlDocument();
-                    doc.LoadHtml(htmlResult);
                     seller.IsAvailable = true;
+                    var htmlResult = await httpResult.Content.ReadAsStringAsync(cancellationToken);
+                    HtmlDocument doc = new();
+                    doc.LoadHtml(htmlResult);
                     HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes(sellersNodes.SearchResultsNode);
                     if (nodes != null)
                     {
@@ -59,17 +52,24 @@ namespace PriceSpy.Web.Models
                     }
                 }
             }
-
             catch (Exception ex)
             {
-
                 ResponseContent responseContent = new();
                 responseContent.Message = ex.ToString();
                 responseContent.isAvailable = false;
             }
-
             return seller;
-
+        }
+        private static Seller CreateSeller(string search, SellersNodes sellersNodes)
+        {
+            Seller seller = new(sellersNodes.SiteName);
+            if (sellersNodes.SiteName == "Mazrezerv")
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                search = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
+            }
+            seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", search);
+            return seller;
         }
         private static Card ParseCard(HtmlNode cardNode, SellersNodes sellersNodes)
         {
@@ -99,7 +99,8 @@ namespace PriceSpy.Web.Models
         {
             string? cardName = String.Empty;
             if (cardNode.SelectSingleNode(nameNode) == null) return cardName = "-----";
-            cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim().Replace("&#34;", "").Replace("&quot;", "") ?? string.Empty;
+            cardName = cardNode.SelectSingleNode(nameNode)?.InnerText.Trim() ?? string.Empty;
+            cardName = RemoveUselessFromString(cardName);
             if (cardName == string.Empty) cardName = "-----";
             return cardName;
         }
@@ -107,7 +108,8 @@ namespace PriceSpy.Web.Models
         {
             float cardPrice = 0;
             if (cardNode.SelectSingleNode(priceNode) == null) return cardPrice = 0;
-            var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim().Replace("&nbsp;", "").Replace("р.", "").Replace("руб.", "").Replace("/комплект", "").Replace(".", ",").Replace("от", "");
+            var priceText = cardNode.SelectSingleNode(priceNode).InnerText.Trim();
+            priceText = RemoveUselessFromString(priceText).Replace(".", ",");
             bool isRightPrice = float.TryParse(priceText, NumberStyles.Any, CultureInfo.CurrentCulture, out float price);
             if (isRightPrice) cardPrice = price;
             if (host.Contains(".ru")) cardPrice = price * SampleViewModel.Rate;
@@ -132,7 +134,7 @@ namespace PriceSpy.Web.Models
             }
             return cardPicture;
         }
-        private static string GetCatNumber(string catNumberNode, HtmlNode cardNode,ref string name)
+        private static string GetCatNumber(string catNumberNode, HtmlNode cardNode, ref string name)
         {
             string? cardCatNumber = String.Empty;
             if (String.IsNullOrEmpty(catNumberNode)) return cardCatNumber = Splite(ref name);
@@ -156,7 +158,7 @@ namespace PriceSpy.Web.Models
                 _ => cardStatus,
 
             };
-            if (cardNode.SelectSingleNode("td[5]") != null && cardStatus != "Нет в наличии") 
+            if (cardNode.SelectSingleNode("td[5]") != null && cardStatus != "Нет в наличии")
                 return $"В наличии {cardNode.SelectSingleNode("td[5]").InnerText} шт."; // Mazrezerv only
             return cardStatus;
         }
@@ -191,26 +193,26 @@ namespace PriceSpy.Web.Models
                 cardName = cardName.Substring(0, cardName.IndexOf("\n")).Trim();
             }
             for (int i = cardName.Length - 1; i >= 0; i--)
+            {
+                if (cardName[i] == ')')
                 {
-                    if (cardName[i] == ')')
-                    {
-                        numberOfParentheses++;
-                    }
-                    if (cardName[i] == '(')
-                        numberOfParentheses--;
-                    if (numberOfParentheses == 0)
-                    {
-                        charIndexForTrim = i;
-                        break;
-                    }
+                    numberOfParentheses++;
                 }
-                if (charIndexForTrim+1 < cardName.Length)
+                if (cardName[i] == '(')
+                    numberOfParentheses--;
+                if (numberOfParentheses == 0)
+                {
+                    charIndexForTrim = i;
+                    break;
+                }
+            }
+            if (charIndexForTrim + 1 < cardName.Length)
             {
                 cardNumber = cardName.Remove(cardName.Length - 1)[(charIndexForTrim + 1)..].TrimEnd().Replace("&quot", "");
                 if (string.IsNullOrEmpty(cardNumber)) cardNumber = "-----";
                 cardName = cardName.Substring(0, charIndexForTrim).Trim().Replace("&quot", "");
             }
-                else
+            else
             {
                 cardName = "-----";
             }
@@ -224,17 +226,24 @@ namespace PriceSpy.Web.Models
             cardPicture = cardPicture.Replace("resize_cache/", "").Replace("56_56_1/", "");
 
             return cardPicture;
-        
-    }
+
+        }
         private static string RemoveCatNumber(string cardName, string cardNumber)
         {
             if (cardName.Contains(cardNumber)) cardName = cardName.Replace(cardNumber, "").Trim();
 
             return cardName;
         }
+        private static string RemoveUselessFromString(string s)
+        {
+            foreach (string removeThis in HtmlReader._stringsForReplace)
+                s = s.Replace(removeThis, "");
+            return s;
+        }
         private static bool CardIsDuplicate(string cardUrl, HashSet<string> uniqueCards)
         {
             return !uniqueCards.Add(cardUrl);
         }
+        private static string[] _stringsForReplace = new string[] { "&nbsp;", "р.", "руб.", "/комплект", "от", "&#34;", "&quot;" };
     }
 }

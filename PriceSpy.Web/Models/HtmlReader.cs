@@ -17,15 +17,13 @@ namespace PriceSpy.Web.Models
         }
         public async Task<Seller> GetResultsAsync(string search, SellersNodes sellersNodes, SqliteConnection connection, CancellationToken cancellationToken)
         {
-
-            ResponseContent responseContent = new();
             Seller seller = new(sellersNodes.SiteName);
             if (sellersNodes.SiteName == "Mazrezerv")
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 search = HttpUtility.UrlEncode(search, GetEncoding("windows-1251"));
             }
-                seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", search);
+            seller.SearchUrl = sellersNodes.SearchUrl.Replace("searchQuery", search);
 
             try
             {
@@ -50,17 +48,7 @@ namespace PriceSpy.Web.Models
                                 if (string.IsNullOrEmpty(id)) continue;
                                 cardNode = doc.DocumentNode.SelectSingleNode(sellersNodes.ProdId.Replace("ProdId", id));
                             }
-                            Card card = new();
-                            card.UrlPrefix = sellersNodes.SiteHost;
-                            string name = GetName(sellersNodes.NameNode, cardNode);
-                            card.Name = GetName(sellersNodes.NameNode, cardNode);
-                            card.Price = GetPrice(sellersNodes.PriceNode, cardNode, sellersNodes.SiteHost);
-                            card.Picture = GetPicture(sellersNodes.PictureNode, card.UrlPrefix, cardNode, sellersNodes.PictureAttribute);
-                            card.CatNumber = GetCatNumber(sellersNodes.CatNumberNode, cardNode, ref name);
-                            card.Name = RemoveCatNumber(name, card.CatNumber);
-                            card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
-                            card.IsAvailable = GetAvailable(card.Status);
-                            card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
+                            Card card = ParseCard(cardNode, sellersNodes);
                             if (CardIsDuplicate(card.CardUrl, uniqueCards)) continue;
                             DataBaseHandler.FindElementInDb(card, connection);
                             seller.CardList.Add(card);
@@ -74,12 +62,38 @@ namespace PriceSpy.Web.Models
 
             catch (Exception ex)
             {
+
+                ResponseContent responseContent = new();
                 responseContent.Message = ex.ToString();
                 responseContent.isAvailable = false;
             }
 
             return seller;
 
+        }
+        private static Card ParseCard(HtmlNode cardNode, SellersNodes sellersNodes)
+        {
+            Card card = new();
+            try
+            {
+                card.UrlPrefix = sellersNodes.SiteHost;
+                card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
+                string name = GetName(sellersNodes.NameNode, cardNode);
+                card.Name = GetName(sellersNodes.NameNode, cardNode);
+                card.Price = GetPrice(sellersNodes.PriceNode, cardNode, sellersNodes.SiteHost);
+                card.Picture = GetPicture(sellersNodes.PictureNode, card.UrlPrefix, cardNode, sellersNodes.PictureAttribute);
+                card.CatNumber = GetCatNumber(sellersNodes.CatNumberNode, cardNode, ref name);
+                card.Name = RemoveCatNumber(name, card.CatNumber);
+                card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
+                card.IsAvailable = GetAvailable(card.Status);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine(card.Name + ": Parse error " + string.Concat(card.UrlPrefix, card.CardUrl));
+                card.IsAvailable = false;
+                card.Status = "Parse error";
+            }
+            return card;
         }
         private static string GetName(string nameNode, HtmlNode cardNode)
         {
@@ -125,7 +139,7 @@ namespace PriceSpy.Web.Models
             if (cardNode.SelectSingleNode(catNumberNode) == null) return cardCatNumber = "-----";
             cardCatNumber = cardNode.SelectSingleNode(catNumberNode)?.InnerText.Trim();
             if (String.IsNullOrEmpty(cardCatNumber)) cardCatNumber = "-----";
-            if (cardCatNumber.Length > 30) return cardCatNumber.Remove(30, cardCatNumber.Length);
+            if (cardCatNumber.Length > 30) return cardCatNumber.Remove(30);
             return cardCatNumber;
         }
         private static string GetStatus(string statusNode, HtmlNode cardNode)

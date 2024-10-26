@@ -45,6 +45,7 @@ namespace PriceSpy.Web.Controllers
             {
                 SampleViewModel.Sites.Add(await htmlReader.GetResultsAsync(searchQuery, sellersNodes, connection, cancellationToken));
             }
+            await DataBaseHandler.BeginTransaction(connection);
             await connection.CloseAsync();
             swatch.Stop();
             Console.WriteLine(swatch.Elapsed);

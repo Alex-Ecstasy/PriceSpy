@@ -8,13 +8,16 @@ namespace PriceSpy.Web.Models
         private static readonly string _dbFileName = "Products.db";
         private static readonly string _dbFile = Path.Combine(DataFromLocalFiles.pathData, _dbFileName);
         private static readonly string _dbConnection = "DataSource=" + _dbFile;
+        private static SqliteTransaction? _transaction;
+        private static SqliteCommand _command = new();
+        private static List<SqliteCommand> _batchedCommands = new();
         public static void FindElementInDb(Card card, SqliteConnection connection)
         {
             var productID = card.UrlPrefix + card.CardUrl;
             string selectQuery = "SELECT * FROM Products WHERE ID = @id";
-            using SqliteCommand command = new(selectQuery, connection);
-            command.Parameters.AddWithValue("@id", productID);
-            var reader = command.ExecuteReader();
+            using SqliteCommand selectCommand = new(selectQuery, connection);
+            selectCommand.Parameters.AddWithValue("@id", productID);
+            var reader = selectCommand.ExecuteReader();
             if (reader.HasRows) SetPrices(card, reader, connection); 
             else InsertElement(card, connection);
         }
@@ -24,6 +27,37 @@ namespace PriceSpy.Web.Models
             var connection = new SqliteConnection(_dbConnection);
             await connection.OpenAsync();
             return connection;
+        }
+        public static async Task BeginTransaction(SqliteConnection connection)
+        {
+            if (_batchedCommands.Count > 0)
+            {
+                int i = 0;
+                using var transaction = connection.BeginTransaction();
+                try
+                {
+                    foreach (var command in _batchedCommands)
+                    {
+                        command.Connection = connection;
+                        command.Transaction = transaction;
+                        await command.ExecuteNonQueryAsync();
+                    }
+                    transaction.Commit();
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    Console.WriteLine("Transaction Error"); // Unique ID error
+                }
+                finally
+                {
+                    _batchedCommands.Clear();
+                }
+                //_transaction = connection.BeginTransaction();
+                //_command = connection.CreateCommand();
+                //_command.Transaction = _transaction;
+            }
+
         }
         private static bool CheckAvailable()
         {
@@ -73,7 +107,8 @@ namespace PriceSpy.Web.Models
                 insertCommand.Parameters.AddWithValue("@id", productID);
                 insertCommand.Parameters.AddWithValue("@actualPrice", card.Price);
                 insertCommand.Parameters.AddWithValue("@actualDate", actualDate);
-                insertCommand.ExecuteNonQuery();
+                _batchedCommands.Add(insertCommand);
+                //await insertCommand.ExecuteNonQueryAsync();
                 card.IsJustAdded = true;
             }
         }
@@ -165,7 +200,8 @@ namespace PriceSpy.Web.Models
                     updateCommand.Parameters.AddWithValue("@actualPriceDateDb", actualPriceDateDb);
                     updateCommand.Parameters.AddWithValue("@minPriceDateDb", minPriceDateDb);
                     updateCommand.Parameters.AddWithValue("@maxPriceDateDb", maxPriceDateDb);
-                    updateCommand.ExecuteNonQuery();
+                    _batchedCommands.Add(updateCommand);
+                    //updateCommand.ExecuteNonQuery();
                 }
                 catch (Exception)
                 {

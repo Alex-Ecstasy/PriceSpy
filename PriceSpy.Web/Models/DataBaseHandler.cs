@@ -8,8 +8,6 @@ namespace PriceSpy.Web.Models
         private static readonly string _dbFileName = "Products.db";
         private static readonly string _dbFile = Path.Combine(DataFromLocalFiles.pathData, _dbFileName);
         private static readonly string _dbConnection = "DataSource=" + _dbFile;
-        private static SqliteTransaction? _transaction;
-        private static SqliteCommand _command = new();
         private static List<SqliteCommand> _batchedCommands = new();
         public static void FindElementInDb(Card card, SqliteConnection connection)
         {
@@ -47,17 +45,13 @@ namespace PriceSpy.Web.Models
                 catch
                 {
                     transaction.Rollback();
-                    Console.WriteLine("Transaction Error"); // Unique ID error
+                    Console.WriteLine("Transaction Error");
                 }
                 finally
                 {
                     _batchedCommands.Clear();
                 }
-                //_transaction = connection.BeginTransaction();
-                //_command = connection.CreateCommand();
-                //_command.Transaction = _transaction;
             }
-
         }
         private static bool CheckAvailable()
         {

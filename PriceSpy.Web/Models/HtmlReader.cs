@@ -19,7 +19,7 @@ namespace PriceSpy.Web.Models
         {
 
             ResponseContent responseContent = new();
-            Seller? seller = new(sellersNodes.SiteName);
+            Seller seller = new(sellersNodes.SiteName);
             if (sellersNodes.SiteName == "Mazrezerv")
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -40,7 +40,8 @@ namespace PriceSpy.Web.Models
                     HtmlNodeCollection nodes = doc.DocumentNode.SelectNodes(sellersNodes.SearchResultsNode);
                     if (nodes != null)
                     {
-                        for(int i = 0; i < nodes.Count; i++)
+                        var uniqueCards = new HashSet<string>();
+                        for (int i = 0; i < nodes.Count; i++)
                         {
                             var cardNode = nodes[i];
                             if (!string.IsNullOrEmpty(sellersNodes.ProdId))
@@ -60,11 +61,13 @@ namespace PriceSpy.Web.Models
                             card.Status = GetStatus(sellersNodes.StatusNode, cardNode);
                             card.IsAvailable = GetAvailable(card.Status);
                             card.CardUrl = GetCardUrl(sellersNodes.CardUrlNode, cardNode);
-                            DataBaseHandler.FindElementInDb(card, connection); //Too slow
+                            if (CardIsDuplicate(card.CardUrl, uniqueCards)) continue;
+                            DataBaseHandler.FindElementInDb(card, connection);
                             seller.CardList.Add(card);
                         }
                         seller.CardList = seller.CardList.OrderByDescending(x => x.IsAvailable).ToList();
                         nodes.Clear();
+                        uniqueCards.Clear();
                     }
                 }
             }
@@ -214,6 +217,10 @@ namespace PriceSpy.Web.Models
             if (cardName.Contains(cardNumber)) cardName = cardName.Replace(cardNumber, "").Trim();
 
             return cardName;
+        }
+        private static bool CardIsDuplicate(string cardUrl, HashSet<string> uniqueCards)
+        {
+            return !uniqueCards.Add(cardUrl);
         }
     }
 }

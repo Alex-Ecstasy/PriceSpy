@@ -1,0 +1,50 @@
+﻿@model Card
+@{
+    string price = string.Format("{0:f2}", @Model.Price);
+}
+<div class="card" style="width: 280px;">
+    <img src="@Url.Content(Model.Picture)" alt="" style="height:200px; object-fit:contain">
+    <div class="card-body">
+        <h6 class="card-text">@Model.CatNumber</h6>
+        @if (@Model.IsAvailable == true)
+        {
+            <ul class="list-group list-group-horizontal" style="list-style-type: none;">
+                <li class="list-group-item" style="padding: 0px; border: 0px">
+                    <a class="btn btn-primary" href="@(Model.UrlPrefix)@(Model.CardUrl)">@(price) BYN</a>
+                </li>
+                <li>
+                    <ul style="font-size: 12px; padding-left: 10px;">
+                        @if (Model.IsJustAdded == true)
+                        {
+                            <li>Цена товара</li>
+                            <li>добавлена в базу</li>
+                        }
+                        else
+                        {
+                            <li>Актуально</li>
+                            <li>@Model.ActualPriceDateDb</li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+            <h6 class="card-text">@Model.Status</h6>
+        }
+        else
+        {
+            <a class="btn btn-outline-danger" style="padding: 0,375rem 4rem; display:table;" href="@(Model.UrlPrefix)@(Model.CardUrl)">@(Model.Price) BYN</a>
+            <h7 class="card-text">@Model.Status</h7>
+        }
+        <p class="card-title">@Model.Name</p>
+        @if (Model.MinPriceDb != null && Model.MaxPriceDb != null)
+        {
+            <div class="container text-left" style="font-size: 12px;padding: 0px;">
+                <div class="row row-cols-2">
+                    <div class="col" style="padding-right: 0px;">Мин: @(Model.MinPriceDb)</div>
+                    <div class="col" style="padding: 0px;">Макс: @(Model.MaxPriceDb)</div>
+                    <div class="col" style="padding-right: 0px;"> @(Model.MinPriceDateDb)</div>
+                    <div class="col" style="padding: 0px;"> @(Model.MaxPriceDateDb)</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

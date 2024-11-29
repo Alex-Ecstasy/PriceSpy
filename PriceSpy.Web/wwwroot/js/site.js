@@ -7,13 +7,20 @@
 $(function () {
     var input = document.querySelector("#search-box");
     var button = document.querySelector("#search-button");
+    var rate = document.querySelector("#rate");
 
     button.onclick = function () {
         if (input.value) {
-            location.href = "/?searchQuery=" + input.value;
+            location.href = "/Home/Results/?searchQuery=" + input.value + "&Rate=" + rate.value;
         }
     }
     input.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.querySelector("#search-button").click();
+        }
+    })
+    rate.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
             event.preventDefault();
             document.querySelector("#search-button").click();
